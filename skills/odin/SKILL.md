@@ -14,6 +14,7 @@ A project's pinned compiler wins over this version. Never suggest bumping the co
 
 ## References (grep headings, read one section)
 - `references/syntax.md`: syntax, control flow, errors, memory basics, constructs other languages emit that fail here.
+- `references/allocators.md`: pick an allocator per lifetime (complexity ladder, decision table, catalog, custom pool and frame arena, temp scoping, tracking, measuring).
 - `references/idioms.md`: how to check an idiom against the core library.
 
 ## Style
