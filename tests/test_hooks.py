@@ -71,7 +71,6 @@ for name, ev, want in [
     ("kept comment ok", edit("a.odin", "// old\nx := 1", "// old\nx := 2"), "allow"),
     ("string slashes ok", edit("a.odin", "x := 1", 'url := "http://x"'), "allow"),
     ("non-odin ok", edit("a.md", "x", "// c"), "allow"),
-    ("odx ignore denied", edit("a.odin", "x := 1", "// odx:ignore transmute why\nx := 1"), "deny"),
 ]:
     expect("edit: " + name, decision(ev), want)
 
@@ -88,7 +87,19 @@ with tempfile.TemporaryDirectory() as tmp:
         {"old_string": "a", "new_string": "a"}, {"old_string": "b", "new_string": "b // c"}]}}
     expect("multiedit: added comment", decision(multi), "deny")
 
-with tempfile.TemporaryDirectory() as odin_dir, tempfile.TemporaryDirectory() as empty_dir:
+ignore = "// odx:ignore transmute reason\nx := 1"
+with tempfile.TemporaryDirectory() as plain, tempfile.TemporaryDirectory() as proj:
+    with open(os.path.join(proj, "odx.json"), "w") as f:
+        f.write("{}")
+    os.makedirs(os.path.join(proj, "src", "deep"))
+    plain_file = os.path.join(plain, "a.odin")
+    proj_file = os.path.join(proj, "src", "deep", "a.odin")
+    expect("odx: ignore without odx.json denied", decision(edit(plain_file, "x := 1", ignore)), "deny")
+    expect("odx: ignore with odx.json allowed", decision(edit(proj_file, "x := 1", ignore)), "allow")
+    expect("odx: other comment with odx.json denied", decision(edit(proj_file, "x := 1", "// why\nx := 1")), "deny")
+    expect("odx: trailing ignore with odx.json denied", decision(edit(proj_file, "x := 1", "x := 1 // odx:ignore transmute r")), "deny")
+
+with tempfile.TemporaryDirectory() as odin_dir,tempfile.TemporaryDirectory() as empty_dir:
     with open(os.path.join(odin_dir, "m.odin"), "w") as f:
         f.write("package m\n")
     code, out = run(START, {"cwd": odin_dir})

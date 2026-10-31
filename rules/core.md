@@ -11,6 +11,8 @@ Read and search existing code before writing. State assumed use cases, one line 
 After large changes run format, checks and tests (odin check, odin test, real runs). Report command and exit code. Fix the code, never disable rules or checks.
 Before any command that cannot be undone, confirm the target. Label anything unverified.
 Unsure whether something is idiomatic: follow skill r5-odin:odin references/idioms.md (grep the core library, read ~50 lines, decide). Delegate lookups to a haiku agent returning a short verdict.
+If the project has odx.json and odx runs, also run `odx check` after large changes; report its exit code. It never replaces odin check/test.
+Never add an `odx:ignore` comment, `pending` entry or `odx.json` change without asking; fix the code instead.
 Repo docs: AGENTS.md and CLAUDE.md stay at repo root and minimal. Other agent or tooling docs go under docs/. Ask before adding root markdown files.
 Short replies.
 Offer an optional short, concise commit message; omit the co-author.

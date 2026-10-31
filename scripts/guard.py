@@ -9,6 +9,7 @@ GIT_BLOCKED = re.compile(
     r"\s+(commit|push|merge)\b"
 )
 COMMENT_EXEMPT = ("// TODO-UPDATE-COMMENT", "// ---")
+ODX_IGNORE = "// odx:ignore"
 
 
 def deny(reason):
@@ -41,10 +42,12 @@ def comment_of(line):
     return None
 
 
-def comment_lines(text):
+def comment_lines(text, odx):
     found = []
     in_block = False
     for line in text.splitlines():
+        if odx and not in_block and line.lstrip().startswith(ODX_IGNORE):
+            continue
         if in_block:
             found.append(line.strip())
             in_block = "*/" not in line
@@ -58,10 +61,21 @@ def comment_lines(text):
     return [c for c in found if not c.startswith(COMMENT_EXEMPT)]
 
 
-def added_comments(old, new):
-    remaining = comment_lines(old)
+def in_odx_project(path):
+    directory = os.path.dirname(os.path.abspath(path))
+    while True:
+        if os.path.isfile(os.path.join(directory, "odx.json")):
+            return True
+        parent = os.path.dirname(directory)
+        if parent == directory:
+            return False
+        directory = parent
+
+
+def added_comments(old, new, odx):
+    remaining = comment_lines(old, odx)
     added = []
-    for comment in comment_lines(new):
+    for comment in comment_lines(new, odx):
         if comment in remaining:
             remaining.remove(comment)
         else:
@@ -100,11 +114,13 @@ def edit_pairs(tool_name, tool_input):
 
 
 def check_edit(tool_name, tool_input):
-    if not tool_input.get("file_path", "").endswith(".odin"):
+    path = tool_input.get("file_path", "")
+    if not path.endswith(".odin"):
         return
+    odx = in_odx_project(path)
     added = []
     for old, new in edit_pairs(tool_name, tool_input):
-        added += added_comments(old, new)
+        added += added_comments(old, new, odx)
     if added:
         deny("new comment lines in .odin code are not allowed (the human writes comments): "
              + " | ".join(added[:3]))
