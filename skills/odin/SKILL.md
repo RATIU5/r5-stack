@@ -5,7 +5,7 @@ description: Write, review and debug Odin code (syntax, idioms, errors, tests, v
 
 # Odin
 
-Verified against Odin dev-2026-10, compiler `dev-2026-10-nightly:84bc3fc`. Remembered APIs are often stale: check the signature in the core library before using one you are unsure of.
+Verified against Odin dev-2026-10, compiler `dev-2026-10-nightly:84bc3fc`. Remembered APIs are often stale, so check the signature in the core library before using one you are unsure of.
 A project's pinned compiler wins over this version. Never suggest bumping the compiler, or an odx rule set, unprompted.
 
 ## First
@@ -23,7 +23,7 @@ A project's pinned compiler wins over this version. Never suggest bumping the co
 - Imperative and procedural. Procedures on data, no methods, no wrapper types. Built-in `[dynamic]`, `map`, slices.
 - Data first: contiguous arrays of plain structs (`#soa` when loops touch few fields), indices or handles instead of pointers, one arena or pool per lifetime. The default heap only by name, never `new` or `make` per object in a loop.
 - Put `defer delete(x)` or `defer free(p)` on the line after the allocation.
-- Fallible procs use named results. Cleanup that only runs on failure: `defer if err != nil {free(p)}`, then `err = .X` and a bare `return`.
+- Fallible procs use named results. For cleanup that runs only on failure, write `defer if err != nil {free(p)}`, then set `err = .X` and use a bare `return`.
 - Library procs take `allocator := context.allocator` and pass it down. Applications may use `context.allocator`.
 - Keep `main` thin. Put logic in packages that tests can call.
 - Handle an error where it happens. Translate at package boundaries. Errors are for environment causes, `assert` is for programmer bugs.
@@ -40,7 +40,7 @@ A project's pinned compiler wins over this version. Never suggest bumping the co
 
 ## Verification
 - `odin check <pkg>` with the project's flags (default `-vet -vet-cast -strict-style`), then `odin test <pkg>`, then a real run. Fix the code; never disable a check.
-- When odx is enabled (`odx.json` in the project root and `odx --version` runs): run `odx check` with the project's pinned compiler on PATH (see `mise.toml`, `odx.json` "odin"). On exit 2 report the error code and fall back to `odin check`; never retry in a loop. For a rule's meaning read `odx --help` or the project README.
+- odx is enabled only if `odx.json` is in the project root and `odx --version` succeeds. Check that first, and otherwise never run or mention odx. When enabled, run `odx check` with the project's pinned compiler on PATH (see `mise.toml`, `odx.json` "odin"). On exit 2 report the error code and fall back to `odin check`; never retry in a loop. For a rule's meaning read `odx --help` or the project README.
 
 ## Reviews
 - Report findings as `file:line - problem - why it matters`, marked confirmed or "(unconfirmed)". Silent bugs first, then rule violations. Do not rewrite unless asked.

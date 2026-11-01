@@ -124,15 +124,9 @@ LIMIT :: #config(LIMIT, 8)
 
 build :: proc(n: int, allocator := context.allocator) -> (a, b: []int, err: Err) {
 	a = make([]int, n, allocator)
-	defer if err != nil {
-		delete(a, allocator)
-		a = nil
-	}
+	defer if err != nil {delete(a, allocator)}
 	b = make([]int, n * 2, allocator)
-	defer if err != nil {
-		delete(b, allocator)
-		b = nil
-	}
+	defer if err != nil {delete(b, allocator)}
 	if n > LIMIT {
 		err = .Too_Big
 		return
@@ -140,7 +134,7 @@ build :: proc(n: int, allocator := context.allocator) -> (a, b: []int, err: Err)
 	return
 }
 ```
-- This replaces `goto fail` cleanup. A deferred block that checks `err` frees on failure and keeps the result on success. Set `err`, then a bare `return`. `return nil, nil, .Too_Big` overwrites `a` and `b` before the defers run, and both leaked `[run]`.
+- This replaces `goto fail` cleanup. A deferred statement that checks `err` frees on failure and keeps the result on success. On failure the returned slices are freed but not nil, so the caller must ignore them; assigning `a = nil` inside the defer does not reach the caller `[run]`. Set `err`, then a bare `return`. `return nil, nil, .Too_Big` overwrites `a` and `b` before the defers run, and both leaked `[run]`.
 - With a tracking allocator, `build(100)` freed everything and `build(2)` left only the caller's two slices `[run]`.
 
 ## Strings

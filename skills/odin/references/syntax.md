@@ -26,7 +26,7 @@ Handler :: #type proc(x: int) -> int
 ```
 - `[N]T` array, `[]T` slice, `[dynamic]T`, `map[K]V`, `[^]T` multi-pointer, `^T` pointer, `p^` deref, `&x` address.
 - Instantiate generics with `Pair(int, string){1, "a"}`. `Maybe(int)` unwraps with `v, ok := mb.?`.
-- `[Kind]string{.A = "a", .B = "b"}` is an enum-indexed array.
+- `[Dir]string{.N = "n", .S = "s"}` is an enum-indexed array when `Dir :: enum {N, S}` is contiguous `[run]`. A gapped enum such as `Kind` above is an error unless written `#partial #sparse[Kind]string{.A = "a", .B = "b"}` `[run]`.
 - Struct field access through a pointer is `p.x`. There is no `->`.
 - `bit_set` backed by an integer array, such as `bit_set[0 ..< 16; [2]u8]`, needs dev-2026-10. It is an error on dev-2026-09.
 - `x: #soa[dynamic]Particle` with `append_soa(&ps, p)` stores struct-of-arrays.
@@ -71,7 +71,12 @@ run :: proc() -> (total: int, err: Err) {
 }
 n := parse("12") or_else -1
 v := parse(s) or_continue
-find :: proc(xs: []int, want: int) -> (index: int, found: bool) #optional_ok {}
+find :: proc(xs: []int, want: int) -> (index: int, found: bool) #optional_ok {
+	for x, i in xs {
+		if x == want {return i, true}
+	}
+	return
+}
 ```
 - Errors are values returned last. `or_return` propagates a non-nil/false last value, `or_else` supplies a default, `or_continue` and `or_break` act inside loops. There are no exceptions.
 - `v, ok := x.(T)` and `v, ok := m[k]` use the comma-ok form.

@@ -3,7 +3,7 @@
 Verified on Odin dev-2026-10 (`dev-2026-10-nightly:84bc3fc`) on darwin_arm64 with Apple clang 21. Code blocks compile with `-vet -vet-cast -strict-style` and were linked against a real C library built from the prototypes below. Tags: `[run]` ran with the stated result, `[src]` read from core source only, `[unverified]` not run. Linux and Windows branches were not run.
 
 ## Stance
-- Bind the smallest surface the program needs, by hand. A generator exists (`odin-c-bindgen`) but was not run for this skill `[unverified]`.
+- Bind only the procedures and types the program needs, by hand. A generator exists (`odin-c-bindgen`) but was not run for this skill `[unverified]`.
 - Cross the boundary with flat data: plain structs, and arrays as pointer plus count. No Odin allocator, `string`, `[dynamic]` or `map` crosses it.
 - Whoever allocates, frees. Name wrapper procedures in pairs (`make_x`, `free_x`) so the owner is visible in the call.
 - Do not let C code pick the memory strategy by accident. C that returns heap memory hands you one allocation per call. Prefer an API that fills a buffer you own (an arena slice or a fixed array), as `fill` below does.
