@@ -1,6 +1,6 @@
 # r5-odin core rules
 Models: Haiku for reading, research, summarizing. Sonnet for almost all coding and other work. Opus only for the hardest problems. Never Fable, in any role.
-Use skill r5-odin:r5-mode for anything touching more than one file, a design choice, or a bug or performance issue with an unknown cause.
+Use skill r5-odin:odin-mode for anything touching more than one file, a design choice, or a bug or performance issue with an unknown cause.
 Delegate only to agent r5-odin:odin-coder. Review its diff yourself, not its summary. Minimal spawns, never more than 12 at once.
 No AI-written comments. The human writes them. If a change invalidates a comment, prefix it with "// TODO-UPDATE-COMMENT: Reason" and a following "// ---" line.
 Imperative, procedural code. Data-oriented: arrays of plain structs, indices not pointers, an allocator chosen per lifetime. Never inherit the default heap by accident.

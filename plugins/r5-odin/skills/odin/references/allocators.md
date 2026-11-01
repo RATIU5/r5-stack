@@ -1,17 +1,17 @@
 # Allocators
 
-Verified on Odin dev-2026-10 (`dev-2026-10-nightly:84bc3fc`). `[run]` means a probe on that compiler confirmed it. `[src]` means read from `core/mem`, `core/mem/virtual` or `base/runtime` source and not executed. Names are `mem.*` (`core:mem`), `vmem.*` (`core:mem/virtual`). Most `[run]` claims are asserted in `tests/allocators` (`odin test tests/allocators`).
+Examples were checked with Odin dev-2026-10. Statements marked (unconfirmed) were read from `core/mem`, `core/mem/virtual` or `base/runtime` source and not run. Everything else was observed by running it. If in doubt, run a quick check on your machine and compiler. Names are `mem.*` (`core:mem`), `vmem.*` (`core:mem/virtual`).
 
 ## Rules
 - Do not default every allocation to `context.allocator`. Pick the allocator from the lifetime and size behavior of the data, then pass it explicitly.
 - Libraries take `allocator := context.allocator` and use it for everything they own. Applications choose and pass allocators.
-- Put `#+vet explicit-allocators` at the top of files that must never use the implicit one. `make([]int, 4)` then fails: "Parameter 'allocator' ... must be explicitly provided" `[run]`.
+- Put `#+vet explicit-allocators` at the top of files that must never use the implicit one. `make([]int, 4)` then fails: "Parameter 'allocator' ... must be explicitly provided".
 - Free what you allocate with the same allocator. Arenas free in bulk, so skip per-item `delete` on them.
 - Any performance claim needs a measurement with `core:time` or a benchmark, on the real build flags. See Measuring.
-- Zero-initialization is the default: `make`, `new` and the arenas zero memory. `mem.alloc_bytes_non_zeroed` does not (first byte 170 from a dirty buffer vs 0) `[run]`.
+- Zero-initialization is the default: `make`, `new` and the arenas zero memory. `mem.alloc_bytes_non_zeroed` does not (first byte 170 from a dirty buffer vs 0).
 
 ## Complexity ladder (try the top rung first)
-1. Static: size known at compile time, lives for the whole program. A global `table: Table` or `[N]T` array, zeroed by default `[run]`. No allocator, no free.
+1. Static: size known at compile time, lives for the whole program. A global `table: Table` or `[N]T` array, zeroed by default. No allocator, no free.
 2. Fixed capacity: allocate the worst case once, up front (arena over a buffer or reserved pages). Pointers stay stable because nothing moves.
 3. Pages from the OS: `vmem.reserve` a large virtual range, `commit` as you grow, `release` at the end. Demand paging means untouched pages cost no physical RAM. `vmem.arena_init_static` wraps this.
 4. Linear (bump) allocation with bulk reset: arena, scratch, frame arena. Data of one lifetime is packed in a line and dies together.
@@ -40,40 +40,40 @@ Resizable arrays that `realloc` move data and break pointers. Prefer fixed capac
 Columns per entry: pattern, lifetime and reset, fragmentation, cost, threads, alignment and zeroing, failure modes, pros and cons, choose when.
 
 ### mem.Arena
-Fixed buffer you own: `mem.arena_init(&a, buf[:])`, `mem.arena_allocator(&a)`. Bump only; `free(p, a)` returns `Mode_Not_Implemented`, reclaim with `mem.arena_free_all` `[run]`. None internally, O(1) alloc, no per-allocation header. Not thread safe `[src]`. Zeroes on `Alloc`; padding counts toward the offset. Returns `Out_Of_Memory` when full `[run]`; resize copies to new space and wastes the old block `[run]`. Pro: simplest, cheapest, stable pointers. Con: fixed size, no early free. Choose for bounded per-task data on the stack or a static buffer.
+Fixed buffer you own: `mem.arena_init(&a, buf[:])`, `mem.arena_allocator(&a)`. Bump only; `free(p, a)` returns `Mode_Not_Implemented`, reclaim with `mem.arena_free_all`. None internally, O(1) alloc, no per-allocation header. Not thread safe (unconfirmed). Zeroes on `Alloc`; padding counts toward the offset. Returns `Out_Of_Memory` when full; resize copies to new space and wastes the old block. Pro: simplest, cheapest, stable pointers. Con: fixed size, no early free. Choose for bounded per-task data on the stack or a static buffer.
 
 ### vmem.Arena (growing, static, buffer kinds)
-`vmem.arena_init_growing`, `arena_init_static(&a, reserved, commit_size)`, `arena_init_buffer`; destroy with `vmem.arena_destroy`. Bump over reserved pages; static reserves one range (default 1 GiB `[run]`) and commits lazily `[src]`; growing chains blocks (1 MiB minimum `[run]`). Reset with `vmem.arena_free_all`, `arena_static_reset_to`, or scope with `vmem.arena_temp_begin` and `arena_temp_end` `[run]`. Locked with a mutex on allocation `[src]`, so it is safe to share but pays for the lock; `arena_alloc_unguarded` skips it. Memory comes zeroed from the OS and is zeroed again on reset. The buffer kind does not zero your buffer: allocations from a dirty buffer come back dirty (first byte 170) `[run]`. Errors from reserve or commit propagate; the Linux and Darwin paths differ on odd errno values `[src]`. Pro: huge address space, stable pointers, no copying. Con: page-granular; reset cost grows with used bytes. Choose as the default arena for level, request and frame data.
+`vmem.arena_init_growing`, `arena_init_static(&a, reserved, commit_size)`, `arena_init_buffer`; destroy with `vmem.arena_destroy`. Bump over reserved pages; static reserves one range (default 1 GiB) and commits lazily (unconfirmed); growing chains blocks (1 MiB minimum). Reset with `vmem.arena_free_all`, `arena_static_reset_to`, or scope with `vmem.arena_temp_begin` and `arena_temp_end`. Locked with a mutex on allocation (unconfirmed), so it is safe to share but pays for the lock; `arena_alloc_unguarded` skips it. Memory comes zeroed from the OS and is zeroed again on reset. The buffer kind does not zero your buffer: allocations from a dirty buffer come back dirty (first byte 170). Errors from reserve or commit propagate; the Linux and Darwin paths differ on odd errno values (unconfirmed). Pro: huge address space, stable pointers, no copying. Con: page-granular; reset cost grows with used bytes. Choose as the default arena for level, request and frame data.
 
 ### mem.Scratch
-`mem.scratch_init(&s, size, backing)`, `scratch_destroy`. Ring-style bump with a backing buffer from the backup allocator. A request that does not fit wraps to offset 0 and silently invalidates earlier allocations `[run]`; requests larger than the whole buffer go to the backup allocator and are tracked as leaks `[run]`. Only the latest allocation can be rolled back; freeing others is a no-op `[src]`. Not thread safe `[src]`. Pro: never fails for small scratch use. Con: silent invalidation; only safe when old results are dead by the next wrap. Choose for rotating temporary buffers, with a size bound you know.
+`mem.scratch_init(&s, size, backing)`, `scratch_destroy`. Ring-style bump with a backing buffer from the backup allocator. A request that does not fit wraps to offset 0 and silently invalidates earlier allocations; requests larger than the whole buffer go to the backup allocator and are tracked as leaks. Only the latest allocation can be rolled back; freeing others is a no-op (unconfirmed). Not thread safe (unconfirmed). Pro: never fails for small scratch use. Con: silent invalidation; only safe when old results are dead by the next wrap. Choose for rotating temporary buffers, with a size bound you know.
 
 ### mem.Stack and mem.Small_Stack
-`mem.stack_init(&s, buf[:])` and `small_stack_init`. LIFO. `Stack` frees only the latest allocation; freeing an earlier one returns `Invalid_Pointer` `[run]`. `Small_Stack` frees any interior pointer and discards everything after it (offset returned to 0 after freeing the first of two) `[run]`; max alignment 128 and one-byte headers `[src]`. Stack has a 16-byte header per allocation `[run]`. No fragmentation, O(1). Not thread safe `[src]`. Pro: cheap nested lifetimes. Con: must free in order; small stack never grows in place `[src]`. Choose for call-tree-shaped lifetimes.
+`mem.stack_init(&s, buf[:])` and `small_stack_init`. LIFO. `Stack` frees only the latest allocation; freeing an earlier one returns `Invalid_Pointer`. `Small_Stack` frees any interior pointer and discards everything after it (offset returned to 0 after freeing the first of two); max alignment 128 and one-byte headers (unconfirmed). Stack has a 16-byte header per allocation. No fragmentation, O(1). Not thread safe (unconfirmed). Pro: cheap nested lifetimes. Con: must free in order; small stack never grows in place (unconfirmed). Choose for call-tree-shaped lifetimes.
 
 ### mem.Dynamic_Arena
-`mem.dynamic_arena_init(&a, block_allocator, array_allocator)`, `dynamic_arena_destroy`, `dynamic_arena_reset`, `dynamic_arena_free_all`. Fixed-size blocks (default 64 KiB `[run]`) from a backing allocator. Requests of 8000, 65536 and 200000 bytes all succeeded `[run]`. `free` returns `Mode_Not_Implemented` `[run]`. Reset keeps unused blocks for reuse `[src]`. Tail of a block is abandoned when a request does not fit `[src]`. Not thread safe `[src]`. Pro: grows without a virtual-memory setup. Con: slack at block ends. Choose when you want growth but not `core:mem/virtual`.
+`mem.dynamic_arena_init(&a, block_allocator, array_allocator)`, `dynamic_arena_destroy`, `dynamic_arena_reset`, `dynamic_arena_free_all`. Fixed-size blocks (default 64 KiB) from a backing allocator. Requests of 8000, 65536 and 200000 bytes all succeeded. `free` returns `Mode_Not_Implemented`. Reset keeps unused blocks for reuse (unconfirmed). Tail of a block is abandoned when a request does not fit (unconfirmed). Not thread safe (unconfirmed). Pro: grows without a virtual-memory setup. Con: slack at block ends. Choose when you want growth but not `core:mem/virtual`.
 
 ### mem.Buddy_Allocator
-`mem.buddy_allocator_init(&b, buf, alignment)`. Power-of-two blocks split and coalesce; the buffer length must be a power of two and the buffer aligned to at least 16, otherwise a runtime assertion fires `[run]`. Frees coalesce; double free is accepted silently `[run]`. Internal fragmentation up to a factor of two; low external fragmentation. Alignment is fixed at init (per-call alignment ignored on `Alloc`) `[src]`. Not thread safe `[src]`. Choose for mixed sizes with individual frees in a fixed arena where predictable fragmentation matters.
+`mem.buddy_allocator_init(&b, buf, alignment)`. Power-of-two blocks split and coalesce; the buffer length must be a power of two and the buffer aligned to at least 16, otherwise a runtime assertion fires. Frees coalesce; double free is accepted silently. Internal fragmentation up to a factor of two; low external fragmentation. Alignment is fixed at init (per-call alignment ignored on `Alloc`) (unconfirmed). Not thread safe (unconfirmed). Choose for mixed sizes with individual frees in a fixed arena where predictable fragmentation matters.
 
 ### mem.Rollback_Stack
-`mem.rollback_stack_init_buffered(&s, buf[:])` or `rollback_stack_init_dynamic`. Stack with out-of-order frees: freeing the last allocation rolls back through freed ones; a double free returns `Invalid_Pointer` `[run]`. 8-byte header per allocation `[src]`. Not thread safe `[src]`. Choose when frees are mostly ordered but not guaranteed.
+`mem.rollback_stack_init_buffered(&s, buf[:])` or `rollback_stack_init_dynamic`. Stack with out-of-order frees: freeing the last allocation rolls back through freed ones; a double free returns `Invalid_Pointer`. 8-byte header per allocation (unconfirmed). Not thread safe (unconfirmed). Choose when frees are mostly ordered but not guaranteed.
 
 ### tlsf.Allocator (core:mem/tlsf)
-General-purpose two-level segregated fit over a buffer or growing pools: O(1) alloc and free, 8-byte header per block, bounded fragmentation `[src]`. Free merges neighbors; a double free asserts `[src]`. No lock `[src]`. Choose for a real-time general allocator with individual frees.
+General-purpose two-level segregated fit over a buffer or growing pools: O(1) alloc and free, 8-byte header per block, bounded fragmentation (unconfirmed). Free merges neighbors; a double free asserts (unconfirmed). No lock (unconfirmed). Choose for a real-time general allocator with individual frees.
 
 ### mem.Tracking_Allocator
-Wraps another allocator and records every live allocation. `mem.tracking_allocator_init(&t, context.allocator)`, `mem.tracking_allocator(&t)`, `tracking_allocator_destroy`. Entries are in `t.allocation_map` (live) and `t.bad_free_array` when `t.bad_free_callback = mem.tracking_allocator_bad_free_callback_add_to_array`; a double free then yields 1 bad-free entry `[run]`. The default callback panics `[src]`. Mutex protected `[src]`. One map entry per live allocation, so use it in debug builds only.
+Wraps another allocator and records every live allocation. `mem.tracking_allocator_init(&t, context.allocator)`, `mem.tracking_allocator(&t)`, `tracking_allocator_destroy`. Entries are in `t.allocation_map` (live) and `t.bad_free_array` when `t.bad_free_callback = mem.tracking_allocator_bad_free_callback_add_to_array`; a double free then yields 1 bad-free entry. The default callback panics (unconfirmed). Mutex protected (unconfirmed). One map entry per live allocation, so use it in debug builds only.
 
 ### mem.Mutex_Allocator
-`mem.mutex_allocator_init(&m, backing)`, `mem.mutex_allocator(&m)`. Serializes every call on one mutex over any backing allocator `[src]`; compiles and runs `[run]`. Choose to share a single-threaded arena across threads when contention is low.
+`mem.mutex_allocator_init(&m, backing)`, `mem.mutex_allocator(&m)`. Serializes every call on one mutex over any backing allocator (unconfirmed); compiles and runs. Choose to share a single-threaded arena across threads when contention is low.
 
 ### mem.panic_allocator and mem.nil_allocator
-`mem.panic_allocator()` panics on any allocation or free: assert that a region never allocates. `mem.nil_allocator()` returns an empty result with no error `[run]`; `runtime.nil_allocator` instead returns `Out_Of_Memory` `[src]`.
+`mem.panic_allocator()` panics on any allocation or free: assert that a region never allocates. `mem.nil_allocator()` returns an empty result with no error; `runtime.nil_allocator` instead returns `Out_Of_Memory` (unconfirmed).
 
 ### Default heap and temp allocator (base:runtime)
-`context.allocator` is the libc-backed heap by default: individual frees, resize in place or by move, over-allocates for alignment `[src]`. Costs a call into libc each time. `context.temp_allocator` is a thread-local arena, 4 MiB default (`runtime.DEFAULT_TEMP_ALLOCATOR_BACKING_SIZE` prints 4194304) `[run]`, reset with `free_all(context.temp_allocator)`.
+`context.allocator` is the libc-backed heap by default: individual frees, resize in place or by move, over-allocates for alignment (unconfirmed). Costs a call into libc each time. `context.temp_allocator` is a thread-local arena, 4 MiB default (`runtime.DEFAULT_TEMP_ALLOCATOR_BACKING_SIZE` prints 4194304), reset with `free_all(context.temp_allocator)`.
 ```odin
 guard := runtime.default_temp_allocator_temp_begin()
 buf := make([]byte, 1024, context.temp_allocator)
@@ -83,7 +83,7 @@ free_all(context.temp_allocator)
 ```
 Scope temp use with begin and end, or call `free_all` at a known point (end of frame, end of request). Never store a temp pointer past that point. A library must not call `free_all(context.temp_allocator)` for its caller.
 
-## Custom allocators (compiled and run)
+## Custom allocators
 An allocator is `mem.Allocator{procedure, data}`. Implement `.Alloc`, `.Free`, `.Free_All`, `.Query_Features`; return `.Mode_Not_Implemented` for modes you do not support. `.Alloc` must be implemented.
 ### Pool for fixed-size objects
 ```odin
@@ -168,7 +168,7 @@ pool_proc :: proc(
 	return nil, nil
 }
 ```
-Behavior `[run]`: freeing then allocating returns the same chunk, zeroed; an oversize request returns `Invalid_Argument`. Zero fragmentation, O(1) alloc and free. Pointers into `region` stay stable. For a single type, skip the allocator interface: keep `[N]T` plus a free list of indices.
+Behavior: freeing then allocating returns the same chunk, zeroed; an oversize request returns `Invalid_Argument`. Zero fragmentation, O(1) alloc and free. Pointers into `region` stay stable. For a single type, skip the allocator interface: keep `[N]T` plus a free list of indices.
 ### Frame arenas
 ```odin
 Frame_Arenas :: struct {
@@ -205,10 +205,10 @@ when ODIN_DEBUG {
 	}
 }
 ```
-`odin test` does this for you: inside a test `context.allocator` is the runner's tracking allocator, not the default heap `[run]`. It prints `+++ leak 8B @ ... [file:line:proc]` but exits 0 `[run]`; read the output.
+`odin test` does this for you: inside a test `context.allocator` is the runner's tracking allocator, not the default heap. It prints `+++ leak 8B @ ... [file:line:proc]` but exits 0; read the output.
 
 ## Measuring
-1M nodes of 32 bytes, best of 5, `-o:speed`, Apple M1 Max, dev-2026-10 `[run]`: heap `new`/`free` 24.2 ms, `vmem.Arena` static 13.1 ms, pool 10.6 ms. The arena figure includes arena setup and first-touch page faults; the pool used a preallocated region. Treat as order of magnitude. Measure your own workload:
+1M nodes of 32 bytes, best of 5, `-o:speed`: heap `new`/`free` 24.2 ms, `vmem.Arena` static 13.1 ms, pool 10.6 ms. These are one machine's numbers. The arena figure includes arena setup and first-touch page faults; the pool used a preallocated region. Treat as order of magnitude. Measure your own workload:
 ```odin
 t := time.tick_now()
 work()

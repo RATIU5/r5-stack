@@ -1,0 +1,13 @@
+{
+  "name": "r5-odin",
+  "version": "0.1.0",
+  "description": "Odin development rules, skills, agent and guard hooks for Claude Code",
+  "author": {
+    "name": "John Memmott",
+    "url": "https://github.com/RATIU5"
+  },
+  "repository": "https://github.com/RATIU5/r5-stack",
+  "homepage": "https://github.com/RATIU5/r5-stack",
+  "license": "MIT",
+  "keywords": ["odin", "ffi", "allocators", "c-abi"]
+}

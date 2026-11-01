@@ -1,29 +1,36 @@
 # Odin and the C ABI
 
-Verified on Odin dev-2026-10 (`dev-2026-10-nightly:84bc3fc`) on darwin_arm64 with Apple clang 21. Code blocks compile with `-vet -vet-cast -strict-style` and were linked against a real C library built from the prototypes below. Tags: `[run]` ran with the stated result, `[src]` read from core source only, `[unverified]` not run. Linux and Windows branches were not run.
+Examples were built with Odin dev-2026-10 and checked with `-vet -vet-cast -strict-style`, linking a C library built from the source below. Results were observed on 64-bit macOS; Linux and Windows were not run. Statements marked (unconfirmed) were not run. If in doubt, run a quick check on your machine and compiler.
 
 ## Stance
-- Bind only the procedures and types the program needs, by hand. A generator exists (`odin-c-bindgen`) but was not run for this skill `[unverified]`.
+- Bind only the procedures and types the program needs, by hand. A generator exists (`odin-c-bindgen`) but was not run for this skill (unconfirmed).
 - Cross the boundary with flat data: plain structs, and arrays as pointer plus count. No Odin allocator, `string`, `[dynamic]` or `map` crosses it.
 - Whoever allocates, frees. Name wrapper procedures in pairs (`make_x`, `free_x`) so the owner is visible in the call.
 - Do not let C code pick the memory strategy by accident. C that returns heap memory hands you one allocation per call. Prefer an API that fills a buffer you own (an arena slice or a fixed array), as `fill` below does.
 
 ## The C side used for the examples
 ```c
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 typedef struct { float x, y; } Vec2;
 typedef struct { uint8_t tag; int32_t id; double w; } Rec;
 typedef enum { MODE_A = 1, MODE_B = 4 } Mode;
 typedef int (*visit_fn)(void *user, int v);
-int sum_i32(const int32_t *xs, size_t n);
-Vec2 vec_add(Vec2 a, Vec2 b);
-size_t rec_size(void);
-int visit(const int32_t *xs, size_t n, visit_fn f, void *user);
-char *make_name(int n);
-void free_name(char *p);
-int32_t *make_table(size_t n);
-void fill(int32_t *out, size_t n, Mode m);
-unsigned flags_echo(unsigned f);
+int sum_i32(const int32_t *xs, size_t n) { int s = 0; for (size_t i = 0; i < n; i++) s += xs[i]; return s; }
+Vec2 vec_add(Vec2 a, Vec2 b) { Vec2 r = {a.x + b.x, a.y + b.y}; return r; }
+size_t rec_size(void) { return sizeof(Rec); }
+size_t rec_off_id(void) { return offsetof(Rec, id); }
+size_t rec_off_w(void) { return offsetof(Rec, w); }
+int visit(const int32_t *xs, size_t n, visit_fn f, void *user) { int s = 0; for (size_t i = 0; i < n; i++) s += f(user, xs[i]); return s; }
+char *make_name(int n) { char *p = malloc(32); snprintf(p, 32, "name-%d", n); return p; }
+void free_name(char *p) { free(p); }
+int32_t *make_table(size_t n) { int32_t *p = malloc(n * 4); for (size_t i = 0; i < n; i++) p[i] = (int32_t)(i * i); return p; }
+void fill(int32_t *out, size_t n, Mode m) { for (size_t i = 0; i < n; i++) out[i] = (int32_t)m; }
+unsigned flags_echo(unsigned f) { return f | 8u; }
 ```
+Build it with `cc -c -O2 lib.c -o lib.o && ar rcs liblib.a lib.o`.
 
 ## Importing and declaring
 ```odin
@@ -55,12 +62,12 @@ foreign libc {
 	c_free :: proc(p: rawptr) ---
 }
 ```
-- A relative path in `foreign import` finds a static library next to the build `[run]`. `system:System` links libc on macOS `[run]`. The `system:c` branch is what core's own runtime uses on other Unix targets `[src: base/runtime/heap_allocator_unix.odin]`.
-- `@(default_calling_convention = "c")` makes every procedure in the block C. Add `link_name = "x"` to bind a C symbol under another Odin name, or `link_prefix = "vec_"` on the block to drop a shared prefix: `add :: proc(a, b: [2]c.float) -> [2]c.float ---` called `vec_add` `[run]`.
+- A relative path in `foreign import` finds a static library next to the build. `system:System` links libc on macOS. The `system:c` branch is what core's own runtime uses on other Unix targets (unconfirmed).
+- `@(default_calling_convention = "c")` makes every procedure in the block C. Add `link_name = "x"` to bind a C symbol under another Odin name, or `link_prefix = "vec_"` on the block to drop a shared prefix: `add :: proc(a, b: [2]c.float) -> [2]c.float ---` called `vec_add`.
 - Procedures in a foreign block end with `---` and have no body.
 
 ## C types
-| C | Odin | Size on darwin_arm64 |
+| C | Odin | Size on 64-bit macOS |
 |---|---|---|
 | `int`, `unsigned` | `c.int`, `c.uint` (`i32`, `u32`) | 4 |
 | `long` | `c.long` (`i64` here) | 8, differs by platform |
@@ -73,8 +80,8 @@ foreign libc {
 | `T *` (one) | `^T` | 8 |
 | `T *` (array) | `[^]T` | 8 |
 | `void *` | `rawptr` | 8 |
-- Sizes are `[run]`. Use the `c.*` names in foreign declarations so a different platform picks its own width. Use plain `i32` and `f32` for your own data.
-- A string literal converts to `cstring` implicitly. A `string` variable does not: "Cannot assign value 's' of type 'string' to 'cstring'" `[run]`.
+- Sizes are. Use the `c.*` names in foreign declarations so a different platform picks its own width. Use plain `i32` and `f32` for your own data.
+- A string literal converts to `cstring` implicitly. A `string` variable does not: "Cannot assign value 's' of type 'string' to 'cstring'".
 
 ## Structs and layout
 ```odin
@@ -106,12 +113,12 @@ Flags :: bit_set[Flag;c.uint]
 
 Visit_Fn :: #type proc "c" (user: rawptr, v: c.int32_t) -> c.int
 ```
-- Fields keep declaration order and C alignment. `Rec` was 16 bytes with `id` at 4 and `w` at 8 in Odin and in C, checked by calling `rec_size` and the offset helpers `[run]`.
+- Fields keep declaration order and C alignment. `Rec` was 16 bytes with `id` at 4 and `w` at 8 in Odin and in C, checked by calling `rec_size` and the offset helpers.
 - Pin every foreign struct with `#assert` on size and offsets. A mismatch becomes a compile error.
-- `struct #packed` matched `#pragma pack(1)` (5 bytes) and `struct #raw_union` matched a C union (4 bytes) `[run]`.
-- `struct #align(16)` aligns the whole struct, not a field. C `_Alignas(16) int32_t b` after a `uint8_t` is size 32, offset 16. Odin `#align(16)` on the outer struct gave size 16, offset 4. Wrap the field instead: `W :: struct #align(16) {v: i32}` gave size 32, offset 16 `[run]`. A field-level `#align` is a syntax error `[run]`.
-- A small vector can be `[2]c.float` for `Vec2`: passed and returned by value with the same result `[run]`. Structs of two floats by value also worked `[run]`.
-- `Mode` and `Flags` pass by value. `flags_echo({.Read, .Write})` returned `{Read, Write, Extra}`, so the `bit_set` carries the C integer unchanged `[run]`.
+- `struct #packed` matched `#pragma pack(1)` (5 bytes) and `struct #raw_union` matched a C union (4 bytes).
+- `struct #align(16)` aligns the whole struct, not a field. C `_Alignas(16) int32_t b` after a `uint8_t` is size 32, offset 16. Odin `#align(16)` on the outer struct gave size 16, offset 4. Wrap the field instead: `W :: struct #align(16) {v: i32}` gave size 32, offset 16. A field-level `#align` is a syntax error.
+- A small vector can be `[2]c.float` for `Vec2`: passed and returned by value with the same result. Structs of two floats by value also worked.
+- `Mode` and `Flags` pass by value. `flags_echo({.Read, .Write})` returned `{Read, Write, Extra}`, so the `bit_set` carries the C integer unchanged.
 
 ## Calling C
 ```odin
@@ -135,10 +142,10 @@ use_c :: proc() {
 	_ = strlen(cs)
 }
 ```
-- `sum_i32` returned 10 and `vec_add` returned `{4, 6}` `[run]`. `fill` wrote `[4, 4, 4]` into an Odin-owned buffer `[run]`.
+- `sum_i32` returned 10 and `vec_add` returned `{4, 6}`. `fill` wrote `[4, 4, 4]` into an Odin-owned buffer.
 - `raw_data(xs)` plus `c.size_t(len(xs))` is the standard way to pass a slice. Slices are not valid C types.
-- `string(name)` is a view of C memory, valid until `free_name`. `tbl[:5]` turns a returned `[^]T` into a slice without copying `[run]`.
-- Free what C allocated with C's free: `free_name(name)` and `c_free(tbl)` ran clean `[run]`. Do not `delete` it with an Odin allocator. On Unix the default heap is libc, so it can look like it works `[src]`, but another platform or a custom `context.allocator` breaks it `[unverified]`.
+- `string(name)` is a view of C memory, valid until `free_name`. `tbl[:5]` turns a returned `[^]T` into a slice without copying.
+- Free what C allocated with C's free: `free_name(name)` and `c_free(tbl)` ran clean. Do not `delete` it with an Odin allocator. On Unix the default heap is libc, so it can look like it works (unconfirmed), but another platform or a custom `context.allocator` breaks it (unconfirmed).
 - Memory C only reads or fills can come from any Odin allocator. Prefer a frame arena or a fixed array over a `make` per call.
 - Struct-of-arrays fits C well. Pass each column as pointer plus count and keep the columns in one arena.
 
@@ -164,8 +171,8 @@ run_visit :: proc(xs: []i32) -> int {
 	return st.calls
 }
 ```
-- A `proc "c"` has no `context`. Using `fmt` or an allocator in it is an error until `context` is assigned `[run]`.
-- `context = runtime.default_context()` works but resets `context.allocator` to the default heap `[run]`. Pass the caller's `context` through the user-data pointer instead, as above. `visit` called back four times and returned 20 `[run]`.
+- A `proc "c"` has no `context`. Using `fmt` or an allocator in it is an error until `context` is assigned.
+- `context = runtime.default_context()` works but resets `context.allocator` to the default heap. Pass the caller's `context` through the user-data pointer instead, as above. `visit` called back four times and returned 20.
 - The user-data pointer must outlive the call. Taking `&st` of a local is fine when C does not keep it.
 - A callback registered with C and called later needs state that lives that long. Allocate it from the lifetime's arena, not per registration.
 
@@ -202,13 +209,14 @@ counter_free :: proc "c" (ctr: ^Counter) {
 odin build pkg -build-mode:static -out:libapi.a -vet -strict-style
 odin build pkg -build-mode:shared -out:libapi.dylib
 ```
-- Both builds succeeded, and `nm -g libapi.a` listed `_r5_add`, `_r5_counter_new`, `_r5_counter_bump` and `_r5_counter_free` `[run]`.
-- A C program with hand-written prototypes, compiled as `clang main.c libapi.a`, printed `5 2` and exited 0 `[run]`. The static library linked without extra runtime flags for this small case. Larger programs that use `fmt`, threads or `core:os` may need more `[unverified]`.
+Use `.so` for the shared library on Linux.
+- Both builds succeeded, and `nm -g libapi.a` listed (macOS adds a leading underscore) `_r5_add`, `_r5_counter_new`, `_r5_counter_bump` and `_r5_counter_free`.
+- A C program with hand-written prototypes, compiled as `cc main.c libapi.a`, printed `5 2` and exited 0. The static library linked without extra runtime flags for this small case. Larger programs that use `fmt`, threads or `core:os` may need more (unconfirmed).
 - Name the C symbols with `link_name` and a library prefix. Odin package names do not become symbol prefixes.
 - Export an opaque handle and keep the layout private. Call `context = runtime.default_context()` in every exported procedure that allocates or prints.
 - The handle above is one long-lived allocation, the named exception to "no default heap". For many objects per handle, store them in arrays inside the handle and let `counter_free` release one arena.
-- Write the C header by hand and compile a C caller in a test. Header generation from Odin was not checked `[unverified]`.
-- Only a C caller was run. Other languages bind the same symbols through their own C FFI `[unverified]`.
+- Write the C header by hand and compile a C caller in a test. Header generation from Odin was not checked (unconfirmed).
+- Only a C caller was run. Other languages bind the same symbols through their own C FFI (unconfirmed).
 
 ## odx projects
 - `transmute` and `#no_bounds_check` are banned. Reinterpret with `cast` or restructure the data. An ignore needs the user's approval.

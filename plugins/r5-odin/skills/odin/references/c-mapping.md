@@ -1,13 +1,13 @@
 # C patterns and their Odin replacements
 
-Verified on Odin dev-2026-10 (`dev-2026-10-nightly:84bc3fc`). Code blocks compile with `-vet -vet-cast -strict-style`. Tags: `[run]` ran and printed the stated result, `[src]` read from core source only.
+Examples were checked with Odin dev-2026-10 and `-vet -vet-cast -strict-style`. Statements marked (unconfirmed) were read from source and not run. If in doubt, run a quick check on your machine and compiler.
 
 ## Stance: data first, allocation per lifetime
 - Design the data before the code. Plain structs in contiguous arrays, one array per kind of thing. Related things refer to each other by index or handle, not by pointer.
 - Know the count, lifetime and owner of every allocation before writing it. Choose the allocator from that (`allocators.md`).
-- Per-object `new` and `make` are fine when the allocator is passed in and suits the lifetime. The allocator is the last or second-to-last argument: `new(T, a)`, `make([]T, n, a)`, `strings.clone(s, a)`. `append` and map inserts use the allocator stored in the container when it was made `[run]`. Put the allocator in a procedure's signature as `allocator := context.allocator` and pass it down.
-- The trap is omitting it. Without an argument, `new`, `make`, `append`, `strings.clone` and `fmt.aprintf` draw from `context.allocator`, whose default is libc `calloc`, `realloc` and `free` on Unix `[src: base/runtime/heap_allocator_unix.odin]`. `context.allocator.procedure == runtime.default_allocator_proc` is true in a fresh program `[run]`. That is `malloc` per object by accident.
-- `context.allocator = a` at the top of a scope redirects every omitted argument below it. `runtime.default_context()` ignores that and returns the default heap `[run]`.
+- Per-object `new` and `make` are fine when the allocator is passed in and suits the lifetime. The allocator is the last or second-to-last argument: `new(T, a)`, `make([]T, n, a)`, `strings.clone(s, a)`. `append` and map inserts use the allocator stored in the container when it was made. Put the allocator in a procedure's signature as `allocator := context.allocator` and pass it down.
+- The trap is omitting it. Without an argument, `new`, `make`, `append`, `strings.clone` and `fmt.aprintf` draw from `context.allocator`, whose default is libc `calloc`, `realloc` and `free` on Unix (unconfirmed). `context.allocator.procedure == runtime.default_allocator_proc` is true in a fresh program. That is `malloc` per object by accident.
+- `context.allocator = a` at the top of a scope redirects every omitted argument below it. `runtime.default_context()` ignores that and returns the default heap.
 - Use the default heap on purpose: few, large, long-lived allocations such as startup config or a loaded asset. Say so by name.
 - Smells to flag in review: `new`, `make` or `free` with no allocator argument inside a loop, a struct that holds pointers to sibling structs, `[dynamic]^T`, a hand-built linked list, a per-frame allocation with no arena, `context.allocator` handed to a short-lived helper.
 - Measured cost of per-node heap allocation versus arena and pool: see "Measuring" in `allocators.md` (heap 24.2 ms, arena 13.1 ms, pool 10.6 ms for 1M nodes on one machine).
@@ -36,7 +36,7 @@ step_soa :: proc(soa: ^#soa[dynamic]Particle) {
 	}
 }
 ```
-- `Particles` is hand-written struct-of-arrays. `#soa[dynamic]Particle` gives the same layout with array-of-structs syntax and `append_soa` `[run]`.
+- `Particles` is hand-written struct-of-arrays. `#soa[dynamic]Particle` gives the same layout with array-of-structs syntax and `append_soa`.
 - Pick SoA when a loop touches one or two fields of many items. Keep one struct when every field is used together.
 - Reserve once (`reserve(&ps.pos, n)`) when the count is known.
 
@@ -85,8 +85,8 @@ slots_get :: proc(slots: []Slot, h: Handle) -> (item: int, ok: bool) {
 	return s.item, true
 }
 ```
-- `Node.next` is an index into a `[]Node`, so the list survives growth and moves. A pointer into a `[dynamic]` went stale after 1000 appends `[run]`.
-- A freed slot is reused and its `gen` is bumped, so an old `Handle` is rejected `[run]` (stale lookup returned `false`, the new handle returned the new item).
+- `Node.next` is an index into a `[]Node`, so the list survives growth and moves. A pointer into a `[dynamic]` went stale after 1000 appends.
+- A freed slot is reused and its `gen` is bumped, so an old `Handle` is rejected (stale lookup returned `false`, the new handle returned the new item).
 - Scan for a free slot is O(n). Keep a free-list index when it matters.
 
 ## One arena per lifetime
@@ -144,8 +144,8 @@ build :: proc(n: int, allocator := context.allocator) -> (a, b: []int, err: Err)
 	return
 }
 ```
-- This replaces `goto fail` cleanup. A deferred statement that checks `err` frees on failure and keeps the result on success. On failure the returned slices are freed but not nil, so the caller must ignore them; assigning `a = nil` inside the defer does not reach the caller `[run]`. Set `err`, then a bare `return`. `return nil, nil, .Too_Big` overwrites `a` and `b` before the defers run, and both leaked `[run]`.
-- With a tracking allocator, `build(100)` freed everything and `build(2)` left only the caller's two slices `[run]`.
+- This replaces `goto fail` cleanup. A deferred statement that checks `err` frees on failure and keeps the result on success. On failure the returned slices are freed but not nil, so the caller must ignore them; assigning `a = nil` inside the defer does not reach the caller. Set `err`, then a bare `return`. `return nil, nil, .Too_Big` overwrites `a` and `b` before the defers run, and both leaked.
+- With a tracking allocator, `build(100)` freed everything and `build(2)` left only the caller's two slices.
 
 ## Strings
 ```odin
@@ -161,13 +161,13 @@ to_c :: proc(s: string) -> cstring {
 	return strings.clone_to_cstring(s, context.temp_allocator)
 }
 ```
-- `string(cs)` is a zero-copy view. It is valid as long as the C memory is. `clone_from_cstring` copies. `len(cs)` scans for the NUL: a buffer `abc\0z\0` gave 3 `[run]`.
+- `string(cs)` is a zero-copy view. It is valid as long as the C memory is. `clone_from_cstring` copies. `len(cs)` scans for the NUL: a buffer `abc\0z\0` gave 3.
 - A `string` is not NUL-terminated. Convert with `clone_to_cstring` at the call into C, and free the clone or use the temp allocator.
 
 ## Slices, void*, errors
-- Pointer plus length is `[]T`, bounds-checked. `raw_data(xs)` plus `len(xs)` goes to C, and `p[:n]` on a `[^]T` returns a slice without copying `[run]`.
+- Pointer plus length is `[]T`, bounds-checked. `raw_data(xs)` plus `len(xs)` goes to C, and `p[:n]` on a `[^]T` returns a slice without copying.
 - `void*` becomes a `union` with a type switch for a closed set, `$T` parameters for one algorithm over many types, and `rawptr` only for user data and C callbacks, converted with `cast(^T)`. Syntax in `syntax.md`.
-- `errno` and out-params become a last error return and `or_return`. `build(100)` returned `.Too_Big` and `build(2)` returned `.None` `[run]`. Syntax in `syntax.md`.
+- `errno` and out-params become a last error return and `or_return`. `build(100)` returned `.Too_Big` and `build(2)` returned `.None`. Syntax in `syntax.md`.
 
 ## Flags
 ```odin
@@ -178,11 +178,11 @@ Flag :: enum c.uint {
 }
 Flags :: bit_set[Flag;c.uint]
 ```
-- `{.Read, .Write}`, `.Write in f`, `card(f)`. `size_of(Flags)` is 4 `[run]`.
+- `{.Read, .Write}`, `.Write in f`, `card(f)`. `size_of(Flags)` is 4.
 - `cast(c.uint)f` is an error ("Cannot cast"). Pass the `bit_set` straight to a C procedure that takes the integer; see `ffi.md`.
 
 ## Macros and #ifdef
-- `LIMIT :: #config(LIMIT, 8)` (declared in the `build` example) is overridden with `-define:LIMIT=2`. With 2, `build(4)` returned `.Too_Big` `[run]`.
+- `LIMIT :: #config(LIMIT, 8)` (declared in the `build` example) is overridden with `-define:LIMIT=2`. With 2, `build(4)` returned `.Too_Big`.
 - `when ODIN_OS == .Darwin {} else {}` selects code at compile time. Declarations are order-independent at package scope, so no forward declarations.
 
 ## Uninitialized memory

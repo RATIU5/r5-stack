@@ -1,6 +1,6 @@
 # Odin syntax and idioms
 
-Verified on Odin dev-2026-10 (`dev-2026-10-nightly:84bc3fc`) with `odin check -vet -vet-cast -strict-style`, `odin run` and `odin test`. Samples below compiled. Statements marked (error) are compiler messages seen on that compiler.
+Examples were checked with Odin dev-2026-10 using `odin check -vet -vet-cast -strict-style`, `odin run` and `odin test`. Statements marked (error) are compiler messages seen there. If in doubt, run a quick check on your compiler.
 
 ## Declarations
 ```odin
@@ -26,7 +26,7 @@ Handler :: #type proc(x: int) -> int
 ```
 - `[N]T` array, `[]T` slice, `[dynamic]T`, `map[K]V`, `[^]T` multi-pointer, `^T` pointer, `p^` deref, `&x` address.
 - Instantiate generics with `Pair(int, string){1, "a"}`. `Maybe(int)` unwraps with `v, ok := mb.?`.
-- `[Dir]string{.N = "n", .S = "s"}` is an enum-indexed array when `Dir :: enum {N, S}` is contiguous `[run]`. A gapped enum such as `Kind` above is an error unless written `#partial #sparse[Kind]string{.A = "a", .B = "b"}` `[run]`.
+- `[Dir]string{.N = "n", .S = "s"}` is an enum-indexed array when `Dir :: enum {N, S}` is contiguous. A gapped enum such as `Kind` above is an error unless written `#partial #sparse[Kind]string{.A = "a", .B = "b"}`.
 - Struct field access through a pointer is `p.x`. There is no `->`.
 - `bit_set` backed by an integer array, such as `bit_set[0 ..< 16; [2]u8]`, needs dev-2026-10. It is an error on dev-2026-09.
 - `x: #soa[dynamic]Particle` with `append_soa(&ps, p)` stores struct-of-arrays.
@@ -142,4 +142,4 @@ add_works :: proc(t: ^testing.T) {testing.expect_value(t, 1 + 1, 2)}
 | Go `for range` | `for x in xs` | idiom |
 | Go `defer` at function end | `defer` at scope end | run result |
 
-Rows marked "idiom" are not backed by an error message above; every other row was reproduced.
+Rows marked "idiom" are not backed by an error message above; every other row comes from a compiler message or a run.

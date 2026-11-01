@@ -1,11 +1,11 @@
 ---
 name: odin
-description: Write, review and debug Odin code (syntax, idioms, errors, tests, verification) using references verified against a real compiler.
+description: Write, review and debug Odin code (syntax, idioms, errors, tests, verification) with references checked against a real compiler.
 ---
 
 # Odin
 
-Verified against Odin dev-2026-10, compiler `dev-2026-10-nightly:84bc3fc`. Remembered APIs are often stale, so check the signature in the core library before using one you are unsure of.
+Examples were checked with Odin dev-2026-10. Remembered APIs are often stale, so check the signature in the core library before using one you are unsure of, and run a quick check on your compiler if in doubt.
 A project's pinned compiler wins over this version. Never suggest bumping the compiler, or an odx rule set, unprompted.
 
 ## First

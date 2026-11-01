@@ -1,0 +1,19 @@
+{
+  "name": "r5-stack",
+  "owner": {
+    "name": "John Memmott",
+    "url": "https://github.com/RATIU5"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by RATIU5"
+  },
+  "plugins": [
+    {
+      "name": "r5-odin",
+      "source": "./plugins/r5-odin",
+      "description": "Odin development rules, skills, agent and guard hooks",
+      "category": "development",
+      "tags": ["odin"]
+    }
+  ]
+}

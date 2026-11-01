@@ -4,7 +4,8 @@ import subprocess
 import sys
 import tempfile
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.join(REPO, "plugins", "r5-odin")
 GUARD = os.path.join(ROOT, "scripts", "guard.py")
 START = os.path.join(ROOT, "scripts", "session_start.py")
 failures = []

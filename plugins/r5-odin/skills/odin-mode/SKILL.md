@@ -1,10 +1,10 @@
 ---
-name: r5-mode
+name: odin-mode
 description: Manually invoked procedure for Odin work that spans several files, a design choice, or a bug or slowdown with an unknown cause.
 disable-model-invocation: true
 ---
 
-# r5 mode
+# odin mode
 
 1. State the goal and the smallest change that meets it, in two lines.
 2. Name the data shape. For every allocation name the allocator and its lifetime (skill `r5-odin:odin`, `references/allocators.md`).
