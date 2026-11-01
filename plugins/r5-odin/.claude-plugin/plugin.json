@@ -1,6 +1,6 @@
 {
   "name": "r5-odin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Odin development rules, skills, agent and guard hooks for Claude Code",
   "author": {
     "name": "John Memmott",

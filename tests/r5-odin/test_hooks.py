@@ -81,6 +81,19 @@ for name, cmd, want in [
     ("grep word", "grep -r 'git commit' .", "allow"),
     ("git diff", "git diff --stat", "allow"),
     ("git -c harmless", "git -c core.pager=cat log", "allow"),
+    ("pull", "git pull", "deny"),
+    ("pull rebase", "git pull --rebase origin main", "deny"),
+    ("rebase", "git rebase main", "deny"),
+    ("cherry-pick", "git cherry-pick abc", "deny"),
+    ("revert", "git revert HEAD", "deny"),
+    ("am", "git am x.patch", "deny"),
+    ("gh pr merge", "gh pr merge 3 --squash", "deny"),
+    ("gh pr create", "gh pr create --fill", "deny"),
+    ("sudo gh pr merge", "sudo gh pr merge 3", "deny"),
+    ("gh pr view", "gh pr view 3", "allow"),
+    ("gh pr list", "gh pr list", "allow"),
+    ("git log", "git log --oneline", "allow"),
+    ("git fetch", "git fetch origin", "allow"),
 ]:
     expect("bash: " + name, decision(bash(cmd)), want)
 

@@ -40,8 +40,15 @@ Run the tests from the repo root:
 
 ```bash
 python3 -I tests/r5-odin/test_hooks.py
+python3 -I tests/r5-odin/test_manifest.py
 odin test tests/r5-odin/allocators -vet -strict-style
 claude plugin validate .
+```
+
+An opt-in end-to-end check runs real `claude -p` sessions and makes API calls:
+
+```bash
+tests/r5-odin/e2e.sh
 ```
 
 ## License

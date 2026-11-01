@@ -40,7 +40,7 @@ A project's pinned compiler wins over this version. Never suggest bumping the co
 
 ## Verification
 - `odin check <pkg>` with the project's flags (default `-vet -vet-cast -strict-style`), then `odin test <pkg>`, then a real run. Fix the code; never disable a check.
-- odx is enabled only if `odx.json` is in the project root and `odx --version` succeeds. Check that first, and otherwise never run or mention odx. When enabled, run `odx check` with the project's pinned compiler on PATH (see `mise.toml`, `odx.json` "odin"). On exit 2 report the error code and fall back to `odin check`; never retry in a loop. For a rule's meaning read `odx --help` or the project README.
+- odx is enabled only if `odx.json` is in the project root and `odx --version` succeeds. Check that first, and otherwise never run or mention odx. When enabled, run `odx check` with the project's pinned compiler on PATH (see `mise.toml`, `odx.json` "odin"). On exit 2 report the error code and fall back to `odin check`; never retry in a loop. For a rule's meaning run `odx explain <rule>` (older odx: read `odx --help`). Cap long output with `odx check --max-findings 20`.
 
 ## Reviews
 - Report findings as `file:line - problem - why it matters`, marked confirmed or "(unconfirmed)". Silent bugs first, then rule violations. Do not rewrite unless asked.

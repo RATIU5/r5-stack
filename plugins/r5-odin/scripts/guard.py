@@ -4,7 +4,8 @@ import re
 import shlex
 import sys
 
-BLOCKED_SUBCOMMANDS = ("commit", "push", "merge")
+BLOCKED_SUBCOMMANDS = ("commit", "push", "merge", "pull", "cherry-pick", "revert", "am", "rebase")
+GH_BLOCKED = (("pr", "merge"), ("pr", "create"))
 SEPARATORS = re.compile(r"\n|;|&&|\|\||\||&|\(|\)|\{|\}|`|\$\(")
 WRAPPERS = {
     "env", "command", "sudo", "doas", "time", "nohup", "exec", "builtin", "xargs",
@@ -62,16 +63,19 @@ def blocked_in_tokens(tokens, depth):
                 found = blocked_command(token, depth + 1)
                 if found:
                     return found
-    if first == "git":
+    if first in ("git", "gh"):
         start = 0
     elif first in WRAPPERS:
-        start = next((i for i, t in enumerate(tokens) if os.path.basename(t) == "git"), None)
+        start = next((i for i, t in enumerate(tokens) if os.path.basename(t) in ("git", "gh")), None)
     else:
         return None
     if start is None:
         return None
+    if os.path.basename(tokens[start]) == "gh":
+        words = tuple([t for t in tokens[start + 1:] if not t.startswith("-")][:2])
+        return "gh " + " ".join(words) if words in GH_BLOCKED else None
     sub = git_subcommand(tokens[start + 1:])
-    return sub if sub in BLOCKED_SUBCOMMANDS else None
+    return "git " + sub if sub in BLOCKED_SUBCOMMANDS else None
 
 
 def blocked_command(command, depth=0):
@@ -175,7 +179,7 @@ def read_file(path):
 def check_bash(tool_input):
     found = blocked_command(text_of(tool_input.get("command")))
     if found:
-        deny("git " + found + " is blocked; the user does this themselves")
+        deny(found + " is blocked; the user does this themselves")
 
 
 def check_agent(tool_input):
