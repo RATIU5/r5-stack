@@ -14,5 +14,5 @@ Unsure whether something is idiomatic: follow skill r5-odin:odin references/idio
 odx is optional and silent. No odx.json in the project root: never run or mention odx. With odx.json, run `odx --version` first; if it fails, treat odx as absent, never run or mention it. If it works, also run `odx check` after large changes and report its exit code. It never replaces odin check/test.
 Never add an `odx:ignore` comment, `pending` entry or `odx.json` change without asking; fix the code instead.
 Repo docs: AGENTS.md and CLAUDE.md stay at repo root and minimal. Other agent or tooling docs go under docs/. Ask before adding root markdown files.
-Short replies.
+Keep replies very short.
 Offer an optional short, concise commit message; omit the co-author.

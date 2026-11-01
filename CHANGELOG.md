@@ -4,6 +4,10 @@ All notable changes to the plugins in this repository are recorded here. The for
 
 ## r5-odin
 
+### [0.1.1] - 2026-11-01
+#### Changed
+- Core rule "Short replies." is now "Keep replies very short."
+
 ### [0.1.0]
 #### Added
 - Skill `odin` with references for syntax, allocators, C mapping, FFI and idiom checks against the core library.
