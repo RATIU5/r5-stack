@@ -9,9 +9,12 @@ command -v odin > /dev/null || { echo "odin is not on PATH"; exit 2; }
 command -v claude > /dev/null || { echo "claude is not on PATH"; exit 2; }
 
 plugin_args=()
-if [ "$MODE" = with ]; then
-  plugin_args=(--plugin-dir "$REPO/plugins/r5-odin")
-fi
+case "$MODE" in
+  with) plugin_args=(--plugin-dir "$REPO/plugins/r5-odin") ;;
+  without) ;;
+  none) plugin_args=(--disallowedTools "Skill(odin)") ;;
+  *) echo "mode must be with, without or none"; exit 2 ;;
+esac
 
 passes=0
 total=0
