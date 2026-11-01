@@ -15,10 +15,13 @@ A project's pinned compiler wins over this version. Never suggest bumping the co
 ## References (grep headings, read one section)
 - `references/syntax.md`: syntax, control flow, errors, memory basics, constructs other languages emit that fail here.
 - `references/allocators.md`: pick an allocator per lifetime (complexity ladder, decision table, catalog, custom pool and frame arena, temp scoping, tracking, measuring).
+- `references/c-mapping.md`: data-oriented stance, and C patterns (malloc, goto cleanup, strings, void*, errno, flags, macros) with their Odin replacements.
+- `references/ffi.md`: C-ABI bindings, struct layout, callbacks, ownership across the boundary, exporting procedures to C.
 - `references/idioms.md`: how to check an idiom against the core library.
 
 ## Style
 - Imperative and procedural. Procedures on data, no methods, no wrapper types. Built-in `[dynamic]`, `map`, slices.
+- Data first: contiguous arrays of plain structs (`#soa` when loops touch few fields), indices or handles instead of pointers, one arena or pool per lifetime. The default heap only by name, never `new` or `make` per object in a loop.
 - Put `defer delete(x)` or `defer free(p)` on the line after the allocation.
 - Fallible procs use named results. Cleanup that only runs on failure: `defer if err != nil {free(p)}`, then `err = .X` and a bare `return`.
 - Library procs take `allocator := context.allocator` and pass it down. Applications may use `context.allocator`.
