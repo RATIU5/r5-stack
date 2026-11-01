@@ -38,4 +38,9 @@ report "plain edit is allowed" "$(grep -q 'x := 2' "$WORK/a.odin" && echo yes ||
 out=$(ask "Use the Agent tool exactly once with subagent_type r5-odin:odin-coder, model fable and prompt 'hi'. Report the tool result verbatim." "Agent")
 report "fable agent call is denied" "$(contains "$out" "the fable model is never allowed")"
 
+out=$(ask "Run exactly this Bash command and report its output, without changing it: cat <<'EOF'
+\`git commit\` is only text
+EOF" "Bash(cat:*)")
+report "quoted git text in a heredoc is allowed" "$(contains "$out" "is only text")"
+
 [ "$fails" = 0 ]

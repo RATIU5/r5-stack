@@ -6,7 +6,7 @@ import sys
 
 BLOCKED_SUBCOMMANDS = ("commit", "push", "merge", "pull", "cherry-pick", "revert", "am", "rebase")
 GH_BLOCKED = (("pr", "merge"), ("pr", "create"))
-SEPARATORS = re.compile(r"\n|;|&&|\|\||\||&|\(|\)|\{|\}|`|\$\(")
+HEREDOC = re.compile(r"<<(-?)\s*(?:'([^']*)'|\"([^\"]*)\"|\\?\w+)")
 WRAPPERS = {
     "env", "command", "sudo", "doas", "time", "nohup", "exec", "builtin", "xargs",
     "eval", "nice", "timeout", "!", "then", "do", "else", "if", "while", "until",
@@ -78,14 +78,94 @@ def blocked_in_tokens(tokens, depth):
     return "git " + sub if sub in BLOCKED_SUBCOMMANDS else None
 
 
+def split_segments(command):
+    segments = []
+    current = []
+    quote = None
+    skip = None
+    i = 0
+    n = len(command)
+
+    def flush():
+        segments.append("".join(current))
+        current.clear()
+
+    while i < n:
+        c = command[i]
+        if quote == "'":
+            current.append(c)
+            if c == "'":
+                quote = None
+            i += 1
+        elif c == "\\" and i + 1 < n:
+            current.append(command[i:i + 2])
+            i += 2
+        elif quote == '"':
+            if c == '"':
+                quote = None
+                current.append(c)
+                i += 1
+            elif c == "`":
+                flush()
+                i += 1
+            elif command.startswith("$(", i):
+                flush()
+                i += 2
+            else:
+                current.append(c)
+                i += 1
+        elif c in "'\"":
+            quote = c
+            current.append(c)
+            i += 1
+        elif command.startswith("<<<", i):
+            current.append("<<<")
+            i += 3
+        elif command.startswith("<<", i):
+            match = HEREDOC.match(command, i)
+            if match is None:
+                current.append("<<")
+                i += 2
+                continue
+            delimiter = match.group(2) if match.group(2) is not None else match.group(3)
+            if delimiter is not None:
+                skip = (match.group(1) == "-", delimiter)
+            current.append(match.group(0))
+            i = match.end()
+        elif c == "\n":
+            flush()
+            i += 1
+            if skip:
+                dash, delimiter = skip
+                skip = None
+                while i < n:
+                    end = command.find("\n", i)
+                    line = command[i:end if end != -1 else n]
+                    i = end + 1 if end != -1 else n
+                    if (line.lstrip("\t") if dash else line) == delimiter:
+                        break
+        elif command.startswith("$(", i):
+            flush()
+            i += 2
+        elif c in ";&|(){}`":
+            flush()
+            i += 1
+        else:
+            current.append(c)
+            i += 1
+    flush()
+    return segments
+
+
 def blocked_command(command, depth=0):
-    command = command.replace("\\n", "\n")
-    for segment in SEPARATORS.split(command):
+    if depth:
+        command = command.replace("\\n", "\n")
+    for segment in split_segments(command):
         try:
             tokens = shlex.split(segment)
         except ValueError:
             tokens = segment.replace("'", "").replace('"', "").split()
-        found = blocked_in_tokens(tokens, depth)
+        found = blocked_in_tokens([t.rstrip(")") for t in tokens], depth)
         if found:
             return found
     return None

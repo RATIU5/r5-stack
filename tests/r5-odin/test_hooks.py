@@ -63,7 +63,7 @@ for name, cmd, want in [
     ("bang", "! git push", "deny"),
     ("xargs", "xargs git push", "deny"),
     ("eval escaped", "eval git\\ push", "deny"),
-    ("ansi newline", "$'true\\ngit commit -m x'", "deny"),
+    ("eval ansi newline", "eval $'true\\ngit commit -m x'", "deny"),
     ("sh -c", "sh -c 'git commit -m x'", "deny"),
     ("here-string", 'bash <<< "git push"', "deny"),
     ("quoted git", '"git" commit', "deny"),
@@ -94,6 +94,17 @@ for name, cmd, want in [
     ("gh pr list", "gh pr list", "allow"),
     ("git log", "git log --oneline", "allow"),
     ("git fetch", "git fetch origin", "allow"),
+    ("quoted separator", 'echo "run this; git push"', "allow"),
+    ("quoted pipe", "grep -r 'a|git commit' .", "allow"),
+    ("single-quoted backtick", "echo 'use `git commit` here'", "allow"),
+    ("quoted heredoc text", "cat <<'EOF'\n`git commit`\ngit push\nEOF", "allow"),
+    ("dash heredoc text", 'cat <<-"EOF"\n\tgit push\n\tEOF', "allow"),
+    ("command after heredoc", "cat <<'EOF'\ntext\nEOF\ngit commit -m x", "deny"),
+    ("unquoted heredoc substitution", "cat <<EOF\n$(git push)\nEOF", "deny"),
+    ("substitution in double quotes", 'echo "$(git push)"', "deny"),
+    ("backtick in double quotes", 'echo "`git commit -m x`"', "deny"),
+    ("and chain", "echo hi && git push", "deny"),
+    ("commit with message", 'git commit -m "fix: a; b"', "deny"),
 ]:
     expect("bash: " + name, decision(bash(cmd)), want)
 
