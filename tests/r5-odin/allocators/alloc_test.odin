@@ -1,11 +1,11 @@
-package allocators_test
+package allocators
 
 import "base:runtime"
-import "core:mem"
-import vmem "core:mem/virtual"
-import "core:mem/tlsf"
-import "core:testing"
 import "core:fmt"
+import "core:mem"
+import "core:mem/tlsf"
+import vmem "core:mem/virtual"
+import "core:testing"
 
 Free_Node :: struct {
 	next: ^Free_Node,
@@ -108,7 +108,6 @@ frames_next :: proc(f: ^Frame_Arenas) {
 	vmem.arena_free_all(&f.arenas[f.current])
 }
 
-
 Table :: struct {
 	vals: [4]int,
 }
@@ -192,7 +191,12 @@ vmem_growing_and_constants :: proc(t: ^testing.T) {
 		_, err := mem.alloc(512 * 1024, 8, al)
 		testing.expect_value(t, err, mem.Allocator_Error.None)
 	}
-	fmt.println("static reserve", vmem.DEFAULT_ARENA_STATIC_RESERVE_SIZE, "growing min", vmem.DEFAULT_ARENA_GROWING_MINIMUM_BLOCK_SIZE)
+	fmt.println(
+		"static reserve",
+		vmem.DEFAULT_ARENA_STATIC_RESERVE_SIZE,
+		"growing min",
+		vmem.DEFAULT_ARENA_GROWING_MINIMUM_BLOCK_SIZE,
+	)
 	testing.expect_value(t, vmem.DEFAULT_ARENA_GROWING_MINIMUM_BLOCK_SIZE, 1 << 20)
 	testing.expect_value(t, vmem.DEFAULT_ARENA_STATIC_RESERVE_SIZE, 1 << 30)
 }
@@ -361,7 +365,11 @@ temp_allocator :: proc(t: ^testing.T) {
 
 @(test)
 test_context_allocator_is_not_default :: proc(t: ^testing.T) {
-	testing.expect(t, context.allocator.procedure != runtime.default_allocator_proc, "tracking in tests")
+	testing.expect(
+		t,
+		context.allocator.procedure != runtime.default_allocator_proc,
+		"tracking in tests",
+	)
 }
 
 @(test)
