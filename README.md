@@ -51,6 +51,14 @@ An opt-in end-to-end check runs real `claude -p` sessions and makes API calls:
 tests/r5-odin/e2e.sh
 ```
 
+A small eval set compares Odin tasks with and without the plugin. Each task has a prompt, a stub, a reference solution and a grader that runs `odin test`. The self-check needs no API calls. The run does:
+
+```bash
+tests/r5-odin/evals/selfcheck.sh
+tests/r5-odin/evals/run.sh with 3
+tests/r5-odin/evals/run.sh without 3
+```
+
 ## License
 
 MIT. See `LICENSE`.

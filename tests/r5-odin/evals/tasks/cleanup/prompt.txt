@@ -1,0 +1,1 @@
+Implement make_pair in pair/pair.odin. It allocates a with n ints and b with 2n ints, both from the given allocator. If n is greater than 8 it returns .Too_Big and leaves nothing allocated. Make `odin test pair` pass. Work only inside the current directory.

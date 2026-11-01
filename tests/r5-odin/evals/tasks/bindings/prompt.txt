@@ -1,0 +1,1 @@
+Write Odin bindings in bind/bind.odin for the C library in lib/ (header lib/vec.h, source lib/vec.c, build it as lib/libvec.a with cc and ar). Add wrappers `dot(a, b: []f32) -> f32` and `mean_of(xs: []f64) -> f64` that call it. Make `odin test bind` pass. Work only inside the current directory.
