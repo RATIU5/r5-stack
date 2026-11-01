@@ -36,7 +36,9 @@ Handler :: #type proc(x: int) -> int
 for i in 0 ..< 3 {}
 for i in 0 ..= 3 {}
 for x, i in xs {}
-for &x in xs {x *= 2}
+for &x in xs {
+	x *= 2
+}
 #reverse for x in xs {}
 for cond {}
 for {}
@@ -73,7 +75,9 @@ n := parse("12") or_else -1
 v := parse(s) or_continue
 find :: proc(xs: []int, want: int) -> (index: int, found: bool) #optional_ok {
 	for x, i in xs {
-		if x == want {return i, true}
+		if x == want {
+			return i, true
+		}
 	}
 	return
 }

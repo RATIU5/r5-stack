@@ -25,11 +25,15 @@ Particles :: struct {
 }
 
 step :: proc(ps: ^Particles) {
-	for i in 0 ..< len(ps.pos) {ps.pos[i] += ps.vel[i]}
+	for i in 0 ..< len(ps.pos) {
+		ps.pos[i] += ps.vel[i]
+	}
 }
 
 step_soa :: proc(soa: ^#soa[dynamic]Particle) {
-	for &p in soa {p.pos.x += 1}
+	for &p in soa {
+		p.pos.x += 1
+	}
 }
 ```
 - `Particles` is hand-written struct-of-arrays. `#soa[dynamic]Particle` gives the same layout with array-of-structs syntax and `append_soa` `[run]`.
@@ -75,7 +79,9 @@ slots_free :: proc(slots: []Slot, h: Handle) {
 
 slots_get :: proc(slots: []Slot, h: Handle) -> (item: int, ok: bool) {
 	s := slots[h.index]
-	if !s.live || s.gen != h.gen {return}
+	if !s.live || s.gen != h.gen {
+		return
+	}
 	return s.item, true
 }
 ```
@@ -124,9 +130,13 @@ LIMIT :: #config(LIMIT, 8)
 
 build :: proc(n: int, allocator := context.allocator) -> (a, b: []int, err: Err) {
 	a = make([]int, n, allocator)
-	defer if err != nil {delete(a, allocator)}
+	defer if err != nil {
+		delete(a, allocator)
+	}
 	b = make([]int, n * 2, allocator)
-	defer if err != nil {delete(b, allocator)}
+	defer if err != nil {
+		delete(b, allocator)
+	}
 	if n > LIMIT {
 		err = .Too_Big
 		return

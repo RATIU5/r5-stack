@@ -23,7 +23,7 @@ A project's pinned compiler wins over this version. Never suggest bumping the co
 - Imperative and procedural. Procedures on data, no methods, no wrapper types. Built-in `[dynamic]`, `map`, slices.
 - Data first: contiguous arrays of plain structs (`#soa` when loops touch few fields), indices or handles instead of pointers, one arena or pool per lifetime. The default heap only by name, never `new` or `make` per object in a loop.
 - Put `defer delete(x)` or `defer free(p)` on the line after the allocation.
-- Fallible procs use named results. For cleanup that runs only on failure, write `defer if err != nil {free(p)}`, then set `err = .X` and use a bare `return`.
+- Fallible procs use named results. For cleanup that runs only on failure, use `defer if err != nil` with a braced block that frees `p`, then set `err = .X` and use a bare `return`. Write blocks on their own lines, never `{stmt}` on one line.
 - Library procs take `allocator := context.allocator` and pass it down. Applications may use `context.allocator`.
 - Keep `main` thin. Put logic in packages that tests can call.
 - Handle an error where it happens. Translate at package boundaries. Errors are for environment causes, `assert` is for programmer bugs.

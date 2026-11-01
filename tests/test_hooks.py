@@ -12,11 +12,13 @@ failures = []
 
 def run(script, event, cwd=None):
     env = dict(os.environ, CLAUDE_PLUGIN_ROOT=ROOT)
+    payload = event if isinstance(event, (bytes, str)) else json.dumps(event)
     proc = subprocess.run(
-        ["python3", "-I", script], input=json.dumps(event), capture_output=True,
-        text=True, env=env, cwd=cwd,
+        ["python3", "-I", script], input=payload, capture_output=True,
+        text=isinstance(payload, str), env=env, cwd=cwd,
     )
-    return proc.returncode, proc.stdout
+    out = proc.stdout if isinstance(proc.stdout, str) else proc.stdout.decode()
+    return proc.returncode, out
 
 
 def decision(event):
@@ -52,6 +54,32 @@ for name, cmd, want in [
     ("chained merge", "cd x && git merge main", "deny"),
     ("git -C commit", "git -C . commit -am x", "deny"),
     ("subshell push", "(git push)", "deny"),
+    ("env", "env git commit -m x", "deny"),
+    ("command", "command git commit -m x", "deny"),
+    ("assignment", "GIT_DIR=.git git commit -m x", "deny"),
+    ("sudo", "sudo git push", "deny"),
+    ("time", "time git push", "deny"),
+    ("bang", "! git push", "deny"),
+    ("xargs", "xargs git push", "deny"),
+    ("eval escaped", "eval git\\ push", "deny"),
+    ("ansi newline", "$'true\\ngit commit -m x'", "deny"),
+    ("sh -c", "sh -c 'git commit -m x'", "deny"),
+    ("here-string", 'bash <<< "git push"', "deny"),
+    ("quoted git", '"git" commit', "deny"),
+    ("quoted sub", "git 'commit'", "deny"),
+    ("escaped git", "g\\it push", "deny"),
+    ("alias commit", "git -c alias.ci=commit ci -m x", "deny"),
+    ("quoted -c value", 'git -c "a=b c" push', "deny"),
+    ("-P flag", "git -P push", "deny"),
+    ("git-dir", "git --git-dir .git commit", "deny"),
+    ("work-tree", "git --work-tree . push", "deny"),
+    ("brace group", "{ git push; }", "deny"),
+    ("if then", "if true; then git push; fi", "deny"),
+    ("full path", "/usr/bin/git commit", "deny"),
+    ("echo word", "echo git push", "allow"),
+    ("grep word", "grep -r 'git commit' .", "allow"),
+    ("git diff", "git diff --stat", "allow"),
+    ("git -c harmless", "git -c core.pager=cat log", "allow"),
 ]:
     expect("bash: " + name, decision(bash(cmd)), want)
 
@@ -71,6 +99,12 @@ for name, ev, want in [
     ("kept comment ok", edit("a.odin", "// old\nx := 1", "// old\nx := 2"), "allow"),
     ("string slashes ok", edit("a.odin", "x := 1", 'url := "http://x"'), "allow"),
     ("non-odin ok", edit("a.md", "x", "// c"), "allow"),
+    ("trailing todo-update denied", edit("a.odin", "x := 1", "x := 1 // --- trailing"), "deny"),
+    ("trailing todo-update marker denied", edit("a.odin", "x := 1", "x := 1 // TODO-UPDATE-COMMENT: r"), "deny"),
+    ("nested block hidden", edit("a.odin", "/* o\n/* i */", "/* o\n/* i */\nhidden text"), "deny"),
+    ("block reopened", edit("a.odin", "x := 1", "x := 1 /* a */ + y /* b\nhidden"), "deny"),
+    ("multiline raw string ok", edit("a.odin", "x := 1", "s := `l1\n// inside raw\n`"), "allow"),
+    ("rune slash ok", edit("a.odin", "x := 1", "r := '/'"), "allow"),
 ]:
     expect("edit: " + name, decision(ev), want)
 
@@ -86,6 +120,12 @@ with tempfile.TemporaryDirectory() as tmp:
     multi = {"tool_name": "MultiEdit", "tool_input": {"file_path": "a.odin", "edits": [
         {"old_string": "a", "new_string": "a"}, {"old_string": "b", "new_string": "b // c"}]}}
     expect("multiedit: added comment", decision(multi), "deny")
+    moved = {"tool_name": "MultiEdit", "tool_input": {"file_path": "a.odin", "edits": [
+        {"old_string": "// keep\nx", "new_string": "x"}, {"old_string": "y", "new_string": "// keep\ny"}]}}
+    expect("multiedit: moved comment ok", decision(moved), "allow")
+    with open(os.path.join(tmp, "bad.odin"), "wb") as f:
+        f.write(b"x := \xff\n")
+    expect("write: non-utf8 existing", decision(write(os.path.join(tmp, "bad.odin"), "x := 1\n")), "allow")
 
 ignore = "// odx:ignore transmute reason\nx := 1"
 with tempfile.TemporaryDirectory() as plain, tempfile.TemporaryDirectory() as proj:
@@ -107,5 +147,28 @@ with tempfile.TemporaryDirectory() as odin_dir,tempfile.TemporaryDirectory() as 
     expect("start: odin project injects rules", code == 0 and "r5-odin core rules" in ctx, True)
     code, out = run(START, {"cwd": empty_dir})
     expect("start: non-odin dir is silent", (code, out.strip()), (0, ""))
+
+for name, raw in [
+    ("empty stdin", ""),
+    ("json list", "[1]"),
+    ("tool_input string", '{"tool_name":"Bash","tool_input":"git push"}'),
+    ("command null", '{"tool_name":"Bash","tool_input":{"command":null}}'),
+    ("file_path null", '{"tool_name":"Edit","tool_input":{"file_path":null,"new_string":null}}'),
+    ("edits null", '{"tool_name":"MultiEdit","tool_input":{"file_path":"a.odin","edits":null}}'),
+    ("edits junk", '{"tool_name":"MultiEdit","tool_input":{"file_path":"a.odin","edits":["x"]}}'),
+]:
+    code, out = run(GUARD, raw)
+    expect("robust guard: " + name, (code, out.strip()), (0, ""))
+expect("robust start: empty stdin", run(START, "")[0], 0)
+
+with tempfile.TemporaryDirectory() as proj:
+    os.makedirs(os.path.join(proj, "docs", "deep"))
+    os.makedirs(os.path.join(proj, "src"))
+    with open(os.path.join(proj, "odx.json"), "w") as f:
+        f.write("{}")
+    with open(os.path.join(proj, "src", "main.odin"), "w") as f:
+        f.write("package main\n")
+    code, out = run(START, {"cwd": os.path.join(proj, "docs", "deep")})
+    expect("start: subdirectory of project injects", code == 0 and "additionalContext" in out, True)
 
 sys.exit(1 if failures else 0)

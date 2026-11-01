@@ -24,7 +24,7 @@ Always-loaded lines (rules plus descriptions): 18 plus 2 = 20, under the 60 limi
 - 29 hook tests pass. `claude plugin validate .` passes with directory warnings (README, LICENSE, icon, author).
 
 ## Unverified
-- `[src]` tags in `allocators.md` (thread safety, cost claims, Dynamic_Arena defaults, tlsf bounds, Scratch backup behavior).
+- `[src]` tags in `allocators.md` that remain (thread safety, cost claims, tlsf bounds and double-free assert, Tracking's default panic, lazy commit). 23 `odin test` cases in `tests/allocators` turned other `[src]` claims into `[run]` and corrected one: Dynamic_Arena accepts requests above its block size.
 - Linux and Windows branches, `odin-c-bindgen`, non-C callers of exported procedures, larger exported libraries.
 - That Odin `free` on C memory breaks off Unix.
 - The `syntax.md` samples were compiled earlier as fragments. Only the lines the reviewers retried were rechecked this stage.
@@ -37,26 +37,24 @@ Always-loaded lines (rules plus descriptions): 18 plus 2 = 20, under the 60 limi
   - (c) `odx.json`, no `odx`: ran `odx --version` (exit 127), then no further odx command. The first run of (c) failed this test: the model ran `odx check` anyway. I rewrote the rule to probe `odx --version` first and treat a failure as absent, and the retest passed.
   - (a) and (c) both skip odx, but the model still mentions odx in its summary when asked to list commands. "Say nothing" is a soft instruction.
 - Hook exemption: a line starting `// odx:ignore` is allowed only when `odx.json` exists in the file's directory or above. Four tests pass.
-- Unverified odx claims: everything about odx comes from its docs. I never ran the real tool.
+- odx was built from a scratch copy of its repo and run (0.2.0, rule set 2). The three frictions, `odx:ignore`, the JSON shape, exit 2 for `odin-missing` and `compiler-mismatch`, and a clean self-check were all confirmed. Not run: `--pending`, `init`, large repos.
+- Found by running odx: its `one-line-block` rule flagged the plugin's one-line examples, so every code example is now multi-line and checks clean under odx.
 
 ## Interrogate results (3 reviewers, effort high, high, medium)
 - Docs reviewer (sonnet): 3 real errors, all fixed. `a = nil` inside a defer does not reach the caller. An enum-indexed array failed with a gapped enum. A `find` sample had no return.
 - Constraint reviewer (haiku): 2 findings, both dismissed. One was my stage A note naming `fable`. The other was the three odx frictions your addendum required.
 - Hook reviewer (opus): findings below. I reproduced 6 of them and have not fixed any.
 
-### Open hook findings
-1. The git guard is a regex. It misses `env git commit`, `command git commit`, `sudo git push`, `sh -c 'git commit'`, `git -c alias.ci=commit ci`, `{ git push; }` and similar. It stops accidents. It is not a sandbox.
-2. A trailing `// ---` or `// TODO-UPDATE-COMMENT` on a code line is exempt, though only line-initial comments should be. Nested `/* /* */ */` and a block reopened on the same line are missed.
-3. Multi-line raw strings are not tracked, so a `//` inside one is denied wrongly.
-4. Empty stdin, `null` fields or a non-UTF-8 file make `guard.py` and `session_start.py` exit 1 with a traceback. The tool call is not blocked in that case.
-5. `session_start.py` searches only downward from the working directory. It misses a session started in a subdirectory of an Odin project, and it injects for a directory with an Odin file three levels down.
+### Hook findings, fixed after the review
+The git guard now tokenizes each command segment. It handles wrappers (`env`, `sudo`, `command`, `xargs`, `eval`, `time`, `!`), variable assignments, quoting, `sh -c` and here-strings, `-c alias.x=commit`, `--git-dir`, `{ }` and `if` forms. It is still a guard against accidents, not a sandbox. The comment scanner tracks nested blocks, reopened blocks and multi-line raw strings, and a trailing `// ---` is no longer exempt. Both hooks fail open with no traceback on bad input, and `session_start.py` also finds markers in ancestor directories. 73 hook tests pass.
 
 ## Review first
-1. The open hook findings, and whether to fix them.
-2. `rules/core.md`, because it is the single source of the rules.
-3. `allocators.md`, the largest file, with the `[src]` items.
+1. `docs/odx-context-prompt.md`, the prompt for the odx owner.
+2. `scripts/guard.py`, rewritten.
+3. The multi-line example rewrite across `references/`.
 
-## Changes for the odx owner (ask first, not done)
+## Changes for the odx owner
+Superseded by `docs/odx-context-prompt.md`, which also records that change A is not needed. The original list:
 A. Exempt foreign blocks from the `name-case` rule.
 B. Make the README and `--help` say `odx test` and `odx run` do not exist, and remove the false claims from `~/Documents/Skills/odin` once r5-odin replaces it.
 C. Add `--max-findings N` or `--summary`.

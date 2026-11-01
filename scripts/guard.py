@@ -1,13 +1,17 @@
 import json
 import os
 import re
+import shlex
 import sys
 
-GIT_BLOCKED = re.compile(
-    r"(?:^|[;&|(`]|\$\()\s*(?:\S+/)?git"
-    r"(?:\s+(?:-C\s+\S+|-c\s+\S+|--[\w-]+(?:=\S+)?))*"
-    r"\s+(commit|push|merge)\b"
-)
+BLOCKED_SUBCOMMANDS = ("commit", "push", "merge")
+SEPARATORS = re.compile(r"\n|;|&&|\|\||\||&|\(|\)|\{|\}|`|\$\(")
+WRAPPERS = {
+    "env", "command", "sudo", "doas", "time", "nohup", "exec", "builtin", "xargs",
+    "eval", "nice", "timeout", "!", "then", "do", "else", "if", "while", "until",
+}
+SHELLS = {"sh", "bash", "zsh", "dash", "ksh", "eval"}
+GIT_VALUE_OPTIONS = {"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--exec-path"}
 COMMENT_EXEMPT = ("// TODO-UPDATE-COMMENT", "// ---")
 ODX_IGNORE = "// odx:ignore"
 
@@ -23,42 +27,119 @@ def deny(reason):
     sys.exit(0)
 
 
-def comment_of(line):
-    quote = None
+def text_of(value):
+    return value if isinstance(value, str) else ""
+
+
+def git_subcommand(args):
+    aliases = {}
     i = 0
-    while i < len(line):
-        c = line[i]
-        if quote:
-            if c == "\\" and quote != "`":
-                i += 2
-                continue
-            if c == quote:
-                quote = None
-        elif c in "\"'`":
-            quote = c
-        elif line.startswith("//", i) or line.startswith("/*", i):
-            return line[i:].strip()
-        i += 1
+    while i < len(args):
+        arg = args[i]
+        if arg == "-c" and i + 1 < len(args):
+            name, _, value = args[i + 1].partition("=")
+            if name.startswith("alias."):
+                aliases[name[len("alias."):]] = value.split()[0] if value.split() else ""
+            i += 2
+        elif arg in GIT_VALUE_OPTIONS:
+            i += 2
+        elif arg.startswith("-"):
+            i += 1
+        else:
+            return aliases.get(arg, arg)
+    return ""
+
+
+def blocked_in_tokens(tokens, depth):
+    while tokens and re.match(r"^\w+=", tokens[0]):
+        tokens = tokens[1:]
+    if not tokens:
+        return None
+    first = os.path.basename(tokens[0])
+    if first in SHELLS and depth < 4:
+        for token in tokens[1:]:
+            if re.search(r"\s", token):
+                found = blocked_command(token, depth + 1)
+                if found:
+                    return found
+    if first == "git":
+        start = 0
+    elif first in WRAPPERS:
+        start = next((i for i, t in enumerate(tokens) if os.path.basename(t) == "git"), None)
+    else:
+        return None
+    if start is None:
+        return None
+    sub = git_subcommand(tokens[start + 1:])
+    return sub if sub in BLOCKED_SUBCOMMANDS else None
+
+
+def blocked_command(command, depth=0):
+    command = command.replace("\\n", "\n")
+    for segment in SEPARATORS.split(command):
+        try:
+            tokens = shlex.split(segment)
+        except ValueError:
+            tokens = segment.replace("'", "").replace('"', "").split()
+        found = blocked_in_tokens(tokens, depth)
+        if found:
+            return found
     return None
 
 
 def comment_lines(text, odx):
     found = []
-    in_block = False
+    depth = 0
+    quote = None
     for line in text.splitlines():
-        if odx and not in_block and line.lstrip().startswith(ODX_IGNORE):
-            continue
+        stripped = line.lstrip()
+        if depth == 0 and quote is None:
+            if odx and stripped.startswith(ODX_IGNORE):
+                continue
+            if stripped.startswith(COMMENT_EXEMPT):
+                continue
+        in_block = depth > 0
+        start = None
+        i = 0
+        while i < len(line):
+            c = line[i]
+            if depth:
+                if line.startswith("/*", i):
+                    depth += 1
+                    i += 2
+                elif line.startswith("*/", i):
+                    depth -= 1
+                    i += 2
+                else:
+                    i += 1
+            elif quote:
+                if c == "\\" and quote != "`":
+                    i += 2
+                    continue
+                if c == quote:
+                    quote = None
+                i += 1
+            elif c in "\"'`":
+                quote = c
+                i += 1
+            elif line.startswith("//", i):
+                if start is None:
+                    start = i
+                break
+            elif line.startswith("/*", i):
+                if start is None:
+                    start = i
+                depth += 1
+                i += 2
+            else:
+                i += 1
+        if quote and quote != "`":
+            quote = None
         if in_block:
             found.append(line.strip())
-            in_block = "*/" not in line
-            continue
-        comment = comment_of(line)
-        if comment is None:
-            continue
-        found.append(comment)
-        if comment.startswith("/*") and "*/" not in comment:
-            in_block = True
-    return [c for c in found if not c.startswith(COMMENT_EXEMPT)]
+        elif start is not None:
+            found.append(line[start:].strip())
+    return found
 
 
 def in_odx_project(path):
@@ -85,42 +166,42 @@ def added_comments(old, new, odx):
 
 def read_file(path):
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8", errors="replace") as f:
             return f.read()
-    except OSError:
+    except (OSError, ValueError):
         return ""
 
 
 def check_bash(tool_input):
-    command = tool_input.get("command", "")
-    match = GIT_BLOCKED.search(command)
-    if match:
-        deny("git " + match.group(1) + " is blocked; the user does this themselves")
+    found = blocked_command(text_of(tool_input.get("command")))
+    if found:
+        deny("git " + found + " is blocked; the user does this themselves")
 
 
 def check_agent(tool_input):
-    if "fable" in str(tool_input.get("model", "")).lower():
+    if "fable" in text_of(tool_input.get("model")).lower():
         deny("the fable model is never allowed; use haiku, sonnet or opus")
 
 
 def edit_pairs(tool_name, tool_input):
-    path = tool_input.get("file_path", "")
+    path = text_of(tool_input.get("file_path"))
     if tool_name == "Write":
-        return [(read_file(path), tool_input.get("content", ""))]
+        return [(read_file(path), text_of(tool_input.get("content")))]
     if tool_name == "MultiEdit":
-        return [(e.get("old_string", ""), e.get("new_string", ""))
-                for e in tool_input.get("edits", [])]
-    return [(tool_input.get("old_string", ""), tool_input.get("new_string", ""))]
+        edits = tool_input.get("edits")
+        edits = [e for e in edits if isinstance(e, dict)] if isinstance(edits, list) else []
+        return [(text_of(e.get("old_string")), text_of(e.get("new_string"))) for e in edits]
+    return [(text_of(tool_input.get("old_string")), text_of(tool_input.get("new_string")))]
 
 
 def check_edit(tool_name, tool_input):
-    path = tool_input.get("file_path", "")
+    path = text_of(tool_input.get("file_path"))
     if not path.endswith(".odin"):
         return
-    odx = in_odx_project(path)
-    added = []
-    for old, new in edit_pairs(tool_name, tool_input):
-        added += added_comments(old, new, odx)
+    pairs = edit_pairs(tool_name, tool_input)
+    old = "\n".join(p[0] for p in pairs)
+    new = "\n".join(p[1] for p in pairs)
+    added = added_comments(old, new, in_odx_project(path))
     if added:
         deny("new comment lines in .odin code are not allowed (the human writes comments): "
              + " | ".join(added[:3]))
@@ -128,8 +209,12 @@ def check_edit(tool_name, tool_input):
 
 def main():
     event = json.load(sys.stdin)
-    tool_name = event.get("tool_name", "")
-    tool_input = event.get("tool_input") or {}
+    if not isinstance(event, dict):
+        return
+    tool_name = text_of(event.get("tool_name"))
+    tool_input = event.get("tool_input")
+    if not isinstance(tool_input, dict):
+        return
     if tool_name == "Bash":
         check_bash(tool_input)
     elif tool_name in ("Agent", "Task"):
@@ -138,4 +223,7 @@ def main():
         check_edit(tool_name, tool_input)
 
 
-main()
+try:
+    main()
+except Exception:
+    sys.exit(0)
