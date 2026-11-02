@@ -20,6 +20,7 @@ passes=0
 total=0
 for task in "$HERE"/tasks/*/; do
   name="$(basename "$task")"
+  export EVALS="$HERE" TASK="${task%/}"
   if [ -n "$ONLY" ] && [[ " $ONLY " != *" $name "* ]]; then
     continue
   fi

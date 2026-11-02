@@ -10,6 +10,7 @@ report() {
 
 for task in "$HERE"/tasks/*/; do
   name="$(basename "$task")"
+  export EVALS="$HERE" TASK="${task%/}"
   work="$(mktemp -d)"
   cp -R "$task/setup/." "$work/"
   if (cd "$work" && bash "$task/grade.sh" > /dev/null 2>&1); then result=no; else result=yes; fi
