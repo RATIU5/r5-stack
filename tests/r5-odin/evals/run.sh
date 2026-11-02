@@ -36,7 +36,7 @@ for task in "$HERE"/tasks/*/; do
     fi
     total=$((total + 1))
     printf '%s\t%s\t%s\t%s\n' "$MODE" "$name" "$trial" "$result"
-    if [ "${KEEP:-0}" = 1 ]; then echo "kept $work"; else rm -rf "$work"; fi
+    if [ "${KEEP:-0}" = 1 ] || [ "$result" = FAIL ]; then echo "kept $work"; else rm -rf "$work"; fi
   done
 done
 echo "$MODE: $passes/$total passed"

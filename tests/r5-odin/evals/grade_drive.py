@@ -4,8 +4,9 @@ import sys
 
 def main():
     measure = json.load(open(sys.argv[1]))
+    raw = open(sys.argv[2]).read()
     output = {}
-    for line in open(sys.argv[2]).read().splitlines():
+    for line in raw.splitlines():
         key, _, value = line.partition(" ")
         output[key] = value.strip()
     ok = measure["exit"] == 0 and measure["killed"] is None
@@ -18,8 +19,12 @@ def main():
             ok = ok and output.get(key) == value
         elif kind == "max":
             ok = ok and key in output and float(output[key]) <= float(value)
+        elif kind == "min":
+            ok = ok and key in output and float(output[key]) >= float(value)
         elif kind == "max-rss":
             ok = ok and measure["peak_rss_mb"] <= float(value)
+        elif kind == "absent":
+            ok = ok and value not in raw
     print(json.dumps({"measure": measure, "output": output, "ok": ok}))
     return 0 if ok else 1
 

@@ -10,6 +10,9 @@ report() {
 
 for task in "$HERE"/tasks/*/; do
   name="$(basename "$task")"
+  if [ -n "${1:-}" ] && [[ " $* " != *" $name "* ]]; then
+    continue
+  fi
   export EVALS="$HERE" TASK="${task%/}"
   work="$(mktemp -d)"
   cp -R "$task/setup/." "$work/"
