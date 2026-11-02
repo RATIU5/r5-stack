@@ -45,9 +45,7 @@ for {}
 for j := 0; j < 2; j += 1 {}
 if v, ok := m["a"]; ok {}
 switch n {
-case 3:
-	fallthrough
-case 4:
+case 3, 4:
 case:
 }
 #partial switch kind {
@@ -59,7 +57,7 @@ case Rect:
 }
 ```
 - One loop keyword: `for`. `while`, `i++`, `elif` are errors. `else if` is fine.
-- Cases do not fall through. `fallthrough` is explicit. `case:` is default.
+- Cases do not fall through. `case 3, 4:` shares code. `fallthrough` exists, but odx projects ban it. `case:` is default.
 - `switch x in union_value` is a type switch. Do not use it on an enum.
 - `defer` runs at the end of the enclosing scope, including a loop body, not the function.
 - Ternary forms both work: `a if cond else b` and `cond ? a : b`.

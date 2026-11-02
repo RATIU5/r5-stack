@@ -1,0 +1,1 @@
+Implement name_of in kinds/kinds.odin as a lookup table indexed by Kind, not a switch. A is "alpha", B is "beta" and C is "gamma". Make `odin test kinds` pass. Work only inside the current directory.

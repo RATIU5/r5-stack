@@ -13,7 +13,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
+        "matcher": "^(Bash|Edit|Write|MultiEdit|Agent|Task)$",
         "hooks": [
           {
             "type": "command",

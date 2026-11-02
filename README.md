@@ -40,9 +40,28 @@ Run the tests from the repo root:
 
 ```bash
 python3 -I tests/r5-odin/test_hooks.py
+python3 -I tests/r5-odin/test_manifest.py
 odin test tests/r5-odin/allocators -vet -strict-style
 claude plugin validate .
 ```
+
+An opt-in end-to-end check runs real `claude -p` sessions and makes API calls:
+
+```bash
+tests/r5-odin/e2e.sh
+```
+
+A small eval set compares Odin tasks with and without the plugin. Each task has a prompt, a stub, a reference solution and a grader that runs `odin test`. The self-check needs no API calls. The run does:
+
+```bash
+python3 -I tests/r5-odin/evals/test_measure.py
+tests/r5-odin/evals/selfcheck.sh
+tests/r5-odin/evals/run.sh with 3
+tests/r5-odin/evals/run.sh without 3
+tests/r5-odin/evals/run.sh none 3
+```
+
+Modes: `with` loads the plugin, `without` is your normal setup, and `none` also blocks a user skill named `odin`. `measure.py` runs a built program with a time limit and a memory cap and reports peak memory.
 
 ## License
 

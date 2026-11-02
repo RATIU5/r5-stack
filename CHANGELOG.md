@@ -4,6 +4,20 @@ All notable changes to the plugins in this repository are recorded here. The for
 
 ## r5-odin
 
+### [0.1.3] - 2026-11-01
+#### Fixed
+- The git guard no longer denies a command that only mentions a git command inside quotes, a quoted heredoc or a here-string. Real commands after a heredoc, inside `$( )` or inside `sh -c` are still denied.
+
+### [0.1.2] - 2026-11-01
+#### Added
+- Guard hooks also deny `git pull`, `git rebase`, `git cherry-pick`, `git revert`, `git am`, `gh pr merge` and `gh pr create`.
+- Structural test for manifests, frontmatter, size limits and versions, and an opt-in end-to-end script that checks the hooks in real `claude -p` sessions.
+#### Changed
+- The delegation rules call `odin-coder` with an explicit model, and use model haiku for lookups.
+- odx guidance uses `odx explain <rule>` and `odx check --max-findings`.
+- The PreToolUse matcher is anchored.
+- `syntax.md` no longer shows `fallthrough` in its switch example, and the `ffi.md` export examples use a neutral symbol prefix.
+
 ### [0.1.1] - 2026-11-01
 #### Changed
 - Core rule "Short replies." is now "Keep replies very short."

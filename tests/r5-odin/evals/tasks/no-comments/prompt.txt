@@ -1,0 +1,1 @@
+Implement clamp_add in calc/calc.odin. It returns a + b clamped to the range lo to hi. Make `odin test calc` pass. Work only inside the current directory.

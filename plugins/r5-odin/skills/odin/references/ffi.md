@@ -182,24 +182,24 @@ Counter :: struct {
 	count: c.int,
 }
 
-@(export, link_name = "r5_add")
+@(export, link_name = "mylib_add")
 add :: proc "c" (a, b: c.int) -> c.int {
 	return a + b
 }
 
-@(export, link_name = "r5_counter_new")
+@(export, link_name = "mylib_counter_new")
 counter_new :: proc "c" () -> ^Counter {
 	context = runtime.default_context()
 	return new(Counter)
 }
 
-@(export, link_name = "r5_counter_bump")
+@(export, link_name = "mylib_counter_bump")
 counter_bump :: proc "c" (ctr: ^Counter) -> c.int {
 	ctr.count += 1
 	return ctr.count
 }
 
-@(export, link_name = "r5_counter_free")
+@(export, link_name = "mylib_counter_free")
 counter_free :: proc "c" (ctr: ^Counter) {
 	context = runtime.default_context()
 	free(ctr)
@@ -210,7 +210,7 @@ odin build pkg -build-mode:static -out:libapi.a -vet -strict-style
 odin build pkg -build-mode:shared -out:libapi.dylib
 ```
 Use `.so` for the shared library on Linux.
-- Both builds succeeded, and `nm -g libapi.a` listed (macOS adds a leading underscore) `_r5_add`, `_r5_counter_new`, `_r5_counter_bump` and `_r5_counter_free`.
+- Both builds succeeded, and `nm -g libapi.a` listed (macOS adds a leading underscore) `_mylib_add`, `_mylib_counter_new`, `_mylib_counter_bump` and `_mylib_counter_free`.
 - A C program with hand-written prototypes, compiled as `cc main.c libapi.a`, printed `5 2` and exited 0. The static library linked without extra runtime flags for this small case. Larger programs that use `fmt`, threads or `core:os` may need more (unconfirmed).
 - Name the C symbols with `link_name` and a library prefix. Odin package names do not become symbol prefixes.
 - Export an opaque handle and keep the layout private. Call `context = runtime.default_context()` in every exported procedure that allocates or prints.

@@ -10,7 +10,7 @@ Use when unsure whether a construct is idiomatic or current. The core library is
 5. Apply it, then confirm with `odin check`. Move on; do not browse.
 
 ## Delegating
-Give a haiku agent the construct, the package to grep and the question. Ask for a verdict of at most 5 lines: idiomatic yes/no/unusual, one file:line citation, the preferred form. Review the citation yourself if the decision matters.
+Give agent `r5-odin:odin-coder`, with model haiku, the construct, the package to grep and the question. Ask for a verdict of at most 5 lines: idiomatic yes/no/unusual, one file:line citation, the preferred form. Review the citation yourself if the decision matters.
 
 ## Signatures worth checking before use
 Allocator parameters, error returns and `#optional_allocator_error` change between releases. Example from dev-2026-10: `strings.clone :: proc(s: string, allocator := context.allocator, loc := #caller_location) -> (res: string, err: runtime.Allocator_Error) #optional_allocator_error`. Read the declaration with `rg -n '^name ::' $ROOT/core/<pkg>` before calling a proc you remember from an older release.
