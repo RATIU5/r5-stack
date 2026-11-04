@@ -10,6 +10,8 @@ def has_marker_above(root):
     while True:
         if any(os.path.isfile(os.path.join(directory, m)) for m in MARKERS):
             return True
+        if os.path.exists(os.path.join(directory, ".git")):
+            return False
         parent = os.path.dirname(directory)
         if parent == directory:
             return False

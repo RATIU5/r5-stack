@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: staging
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -21,8 +21,11 @@ jobs:
     environment: staging
     env:
       TARGET: staging
+      TAG: ${{ github.sha }}
     steps:
       - uses: actions/checkout@SHA
+        with:
+          persist-credentials: false
       - uses: jdx/mise-action@SHA
       - run: mise run build
       - run: mise run deploy

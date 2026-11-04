@@ -1,6 +1,6 @@
 {
   "name": "r5-pipeline",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Unified release and CI/CD toolchain skill for Claude Code: mise, Knope, cocogitto and GitHub Actions",
   "author": {
     "name": "John Memmott",

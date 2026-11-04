@@ -35,6 +35,8 @@ for path in glob.glob(os.path.join(SKILL, "templates", "**", "*"), recursive=Tru
 for wf in glob.glob(os.path.join(SKILL, "templates", "workflows", "*.yml")):
     text = open(wf, encoding="utf-8").read()
     expect(os.path.basename(wf) + ": actions use @SHA token", all(u.endswith("@SHA") for u in re.findall(r"uses: (\S+)", text)))
+    top = text.split("\njobs:")[0]
+    expect(os.path.basename(wf) + ": no workflow-level write permissions", ": write" not in top)
     done = subprocess.run(["ruby", "-ryaml", "-e", "YAML.load_file(ARGV[0])", wf], capture_output=True)
     expect(os.path.basename(wf) + ": parses as YAML", done.returncode == 0)
 
@@ -52,5 +54,8 @@ with tempfile.TemporaryDirectory() as empty, tempfile.TemporaryDirectory() as ma
     expect("hook: silent without mise.toml or knope.toml", run_hook(empty) == "")
     out = run_hook(marked)
     expect("hook: injects rules with mise.toml", "r5-pipeline core rules" in out)
+    nested = os.path.join(marked, "repo")
+    os.makedirs(os.path.join(nested, ".git"))
+    expect("hook: marker above the git root is ignored", run_hook(nested) == "")
 
 sys.exit(1 if failures else 0)
