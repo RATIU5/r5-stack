@@ -15,6 +15,10 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - `build` leaves only files in `dist/`. Components with nothing to ship drop the attest and asset steps.
 - `promote.yml` verifies the attestation against `release.yml`. `ci.yml` passes the base branch through `env`. `staging.yml` sets `TAG`.
 - The session hook stops looking for `mise.toml` at the git root.
+- Regex version files keep the pre-release suffix, so beta versions no longer corrupt `VERSION`.
+- Deno lists only `deno.json` as a version file. Node is pinned to the LTS. npm and bun deploy commands are spelled out.
+- Workflows set permissions per job, disable credential persistence where nothing pushes, and no longer cancel a running staging deploy.
+- The setup check no longer lints a commit range that may not exist.
 
 ## [r5-pipeline 0.1.0] - 2026-11-04
 

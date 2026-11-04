@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@SHA
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: jdx/mise-action@SHA
       - run: mise run lint:commits -- "origin/$BASE..HEAD"
 
@@ -34,6 +35,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@SHA
+        with:
+          persist-credentials: false
       - uses: jdx/mise-action@SHA
       - run: mise run lint
       - run: mise run test

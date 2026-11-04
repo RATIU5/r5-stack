@@ -36,6 +36,7 @@ jobs:
       - uses: actions/checkout@SHA
         with:
           ref: ${{ inputs.tag }}
+          persist-credentials: false
       - uses: jdx/mise-action@SHA
       - run: test "${TAG%%/*}" = "$COMPONENT"
       - run: gh release download "$TAG" --dir dist

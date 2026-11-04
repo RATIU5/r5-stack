@@ -12,7 +12,7 @@ Workflow names in `knope.toml` become subcommands. `prepare-release` is a name f
 ## Config
 - `[packages.<name>]` keys: `versioned_files`, `changelog`, `scopes`, `assets` (a glob string), `extra_changelog_sections`.
 - Native `versioned_files`: Cargo.toml, Cargo.lock, package.json, package-lock.json, deno.json, deno.lock, pyproject.toml, go.mod, pubspec.yaml, pom.xml, gleam.toml, tauri.conf.json.
-- Any other file: `{ path = "VERSION", regex = '(?<version>\d+\.\d+\.\d+)' }`. Do not anchor the regex.
+- Any other file: `{ path = "VERSION", regex = '(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)' }`. Do not anchor the regex. Keep the optional suffix group, or pre-releases corrupt the file.
 - `[changes] ignore_conventional_commits = true` keeps the changelog to changesets only.
 - `[github] owner`, `repo`. The token comes from `GITHUB_TOKEN`.
 - `$version` and `$changelog` work only with `[package]`, so release PR text is fixed.

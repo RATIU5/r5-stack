@@ -15,15 +15,16 @@ concurrency:
   group: prepare-release
   cancel-in-progress: false
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 env:
   MISE_LOCKED: "1"
 
 jobs:
   prepare:
+    permissions:
+      contents: write
+      pull-requests: write
     if: "!contains(github.event.head_commit.message, 'chore: prepare release')"
     runs-on: ubuntu-latest
     timeout-minutes: 10

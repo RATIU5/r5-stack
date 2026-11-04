@@ -53,6 +53,31 @@ mise x -- knope prepare-release > /dev/null
 [ "$(version)" = "1.1.0" ] || fail "graduate to stable"
 echo "ok   pre-release flow"
 
+mkdir ver && cd ver && git init -q -b trunk && git config user.email t@example.com && git config user.name t
+echo 1.0.0 > VERSION
+cat > knope.toml <<'KNOPE'
+[packages.app]
+versioned_files = [{ path = "VERSION", regex = '(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)' }]
+
+[[workflows]]
+name = "prepare-release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+KNOPE
+mkdir .changeset
+vchange() { printf -- '---\napp: minor\n---\n\n# %s\n' "$1" > ".changeset/$1.md"; }
+vchange a; git add -A; git commit -qm init
+mise x -- knope prepare-release --prerelease-label beta > /dev/null
+git add -A; git commit -qm release
+vchange b; mise x -- knope prepare-release --prerelease-label beta > /dev/null
+git add -A; git commit -qm release
+[ "$(cat VERSION)" = "1.1.0-beta.1" ] || fail "regex file keeps pre-release suffix: $(cat VERSION)"
+vchange c; mise x -- knope prepare-release > /dev/null
+[ "$(cat VERSION)" = "1.1.0" ] || fail "regex file graduates: $(cat VERSION)"
+cd ..
+echo "ok   regex version file pre-release"
+
 mise tasks add rp --description x -- echo knope > /dev/null
 [ "$(mise run rp -- --prerelease-label beta 2> /dev/null)" = "knope --prerelease-label beta" ] || fail "task args pass through"
 echo "ok   task args"
