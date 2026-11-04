@@ -4,6 +4,18 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-pipeline 0.1.1] - 2026-11-04
+
+### Changed
+- The skill checks `gh` as well as mise and git, detects the default branch from the remote, and asks before replacing existing release tooling.
+- Changesets are written by hand, because `knope document-change` and `knope --generate` are interactive.
+- The setup check lints a bounded commit range, so repos with older history pass.
+- `RELEASE_TOKEN` is a personal access token, since GitHub App tokens expire after an hour.
+- The hand-off no longer sets a tag rule on `production`, which blocked `promote.yml` dispatched from a branch.
+- `build` leaves only files in `dist/`. Components with nothing to ship drop the attest and asset steps.
+- `promote.yml` verifies the attestation against `release.yml`. `ci.yml` passes the base branch through `env`. `staging.yml` sets `TAG`.
+- The session hook stops looking for `mise.toml` at the git root.
+
 ## [r5-pipeline 0.1.0] - 2026-11-04
 
 ### Added
@@ -47,6 +59,7 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - Hook tests and an `odin test` suite for the allocator reference.
 
 [Unreleased]: https://github.com/RATIU5/r5-stack/commits/main
+[r5-pipeline 0.1.1]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
 [r5-pipeline 0.1.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
 [r5-odin 0.1.3]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
 [r5-odin 0.1.2]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin

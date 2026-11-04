@@ -1,9 +1,9 @@
 # Knope
 
 ## Commands
-- `knope --generate`: starter `knope.toml`. Refuses if one exists. Reshape the result to `[packages.<name>]`.
+- `knope --generate`: interactive. Use `templates/knope.toml` instead.
 - `knope --validate`: no output and exit 0 means valid. It fails in a repo with no commits.
-- `knope document-change`: write `.changeset/<name>.md`. Needs a workflow with a `CreateChangeFile` step.
+- `knope document-change`: interactive, for humans. It writes the changeset file below. Agents write that file directly.
 - `knope prepare-release [--prerelease-label <label>]`: bump versions, write changelogs, delete changesets, run the workflow's other steps.
 - `knope release`: tag and publish versions that have no release, upload `assets`.
 - `--dry-run` on any command prints the plan.

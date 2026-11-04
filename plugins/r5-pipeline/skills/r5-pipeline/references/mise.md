@@ -27,7 +27,7 @@ arg "[args]" var=#true
 '''
 run = 'pnpm run $usage_script $usage_args'
 ```
-  Use the project's package manager in `run`.
+  Use the project's package manager in `run`. For npm write `npm run $usage_script -- $usage_args`.
 
 ## github backend
 `"github:owner/repo"` in `[tools]`. Options: `asset_pattern`, `version_prefix`, `bin_path`, `rename_exe`, `checksum`, `platforms.<os>-<arch>`. `mise lock` records checksums for it.

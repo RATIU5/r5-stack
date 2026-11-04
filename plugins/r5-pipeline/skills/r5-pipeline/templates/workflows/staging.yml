@@ -21,6 +21,7 @@ jobs:
     environment: staging
     env:
       TARGET: staging
+      TAG: ${{ github.sha }}
     steps:
       - uses: actions/checkout@SHA
       - uses: jdx/mise-action@SHA

@@ -20,12 +20,14 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      BASE: ${{ github.base_ref }}
     steps:
       - uses: actions/checkout@SHA
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@SHA
-      - run: mise run lint:commits -- origin/${{ github.base_ref }}..HEAD
+      - run: mise run lint:commits -- "origin/$BASE..HEAD"
 
   check:
     runs-on: ubuntu-latest

@@ -39,5 +39,5 @@ jobs:
       - uses: jdx/mise-action@SHA
       - run: test "${TAG%%/*}" = "$COMPONENT"
       - run: gh release download "$TAG" --dir dist
-      - run: for f in dist/*; do gh attestation verify "$f" --repo "$GITHUB_REPOSITORY"; done
+      - run: for f in dist/*; do gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml"; done
       - run: mise run deploy

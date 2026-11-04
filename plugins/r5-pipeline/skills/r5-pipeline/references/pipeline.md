@@ -8,8 +8,14 @@
 
 Trunk-based: no long-lived branches except the optional `staging` branch.
 
+## Artifacts
+- `build` leaves only files in `dist/`, one per component or more. When the output is a directory tree, end `build` by archiving it (`tar -czf dist/<component>.tgz -C <outdir> .`).
+- Release assets, attestation and promotion all use `dist/*`.
+- A component with nothing to ship (a library published as a tag only) drops `assets` in `knope.toml`, the build and attest steps in `release.yml`, and the download and verify steps in `promote.yml`.
+- Hosts that build from source (Cloudflare Workers, Hydrogen and Oxygen) cannot deploy the archive. `deploy` then builds from the checked-out tag. Tell the user the attestation covers the release assets, not that deploy.
+
 ## Environments
-Take them from the user. Default `production`. Each is a GitHub Environment holding its own secrets and variables. `promote.yml` takes the environment as input, so adding one needs no workflow change. Add `deploy` as a mise task that reads `COMPONENT`, `TAG`, `TARGET` from the environment. Put it in `scripts/deploy.sh` when it is longer than 3 lines.
+Take them from the user. Default `production`. Each is a GitHub Environment holding its own secrets and variables. `promote.yml` takes the environment as input, so adding one needs no workflow change. Add `deploy` as a mise task that reads `TARGET` and `TAG` from the environment, and `COMPONENT` when promoting. Put it in `scripts/deploy.sh` when it is longer than 3 lines.
 
 ## Staging branch
 Use when the user wants changes load tested before production (storefronts).
@@ -19,7 +25,7 @@ Use when the user wants changes load tested before production (storefronts).
 - Production deploys the release artifact built on `BRANCH`, not the staging build.
 
 ## Pre-releases
-Dispatch `prepare-release.yml` with `alpha`, `beta` or `rc`. Knope numbers them `1.1.0-beta.0`, `1.1.0-beta.1`. Dispatch with no label to publish the stable version. Promote a pre-release tag to a non-production environment.
+Dispatch `prepare-release.yml` with `alpha`, `beta` or `rc`. Knope numbers them `1.1.0-beta.0`, `1.1.0-beta.1`. Dispatch with no label to publish the stable version. Promote a pre-release tag to a non-production environment. A label applies to one run: the next push to `BRANCH` prepares a stable release again, so dispatch with the label after each merge.
 
 ## Monorepo
 - One `[packages.<name>]` per shippable component, each with its own `versioned_files` and `changelog`. A changeset names each component it affects.

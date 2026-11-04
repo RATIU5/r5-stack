@@ -52,5 +52,8 @@ with tempfile.TemporaryDirectory() as empty, tempfile.TemporaryDirectory() as ma
     expect("hook: silent without mise.toml or knope.toml", run_hook(empty) == "")
     out = run_hook(marked)
     expect("hook: injects rules with mise.toml", "r5-pipeline core rules" in out)
+    nested = os.path.join(marked, "repo")
+    os.makedirs(os.path.join(nested, ".git"))
+    expect("hook: marker above the git root is ignored", run_hook(nested) == "")
 
 sys.exit(1 if failures else 0)
