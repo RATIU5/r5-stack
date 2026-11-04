@@ -1,4 +1,0 @@
-apps/web/	web
-apps/api/	api
-libs/shared/	web,api
-!docs/

@@ -5,7 +5,7 @@ My personal Claude Code plugins for various programming languages and tasks.
 | Plugin    | What it does                                                                                       |
 | --------- | -------------------------------------------------------------------------------------------------- |
 | `r5-odin` | Rules, skills, an agent and guard hooks for writing Odin, including allocators, C mapping and FFI. |
-| `r5-pipeline` | A skill and templates for one release and CI/CD toolchain across projects: mise, Knope, cocogitto, GitHub Actions. |
+| `r5-pipeline` | A skill and templates for release and CI/CD on GitHub in any language: mise, Knope, cocogitto, GitHub Actions. |
 
 ## Install
 

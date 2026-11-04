@@ -2,7 +2,14 @@ name: prepare-release
 
 on:
   push:
-    branches: [main]
+    branches: [BRANCH]
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Pre-release label, empty for a stable release
+        type: choice
+        options: ["", alpha, beta, rc]
+        default: ""
 
 concurrency:
   group: prepare-release
@@ -21,15 +28,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@SHA
         with:
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
       - run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c
-      - run: mise run release:prepare
+      - uses: jdx/mise-action@SHA
+      - run: mise run release:prepare -- ${{ inputs.prerelease && format('--prerelease-label {0}', inputs.prerelease) }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        continue-on-error: true

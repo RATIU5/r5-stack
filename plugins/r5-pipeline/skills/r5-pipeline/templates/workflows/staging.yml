@@ -1,0 +1,28 @@
+name: staging
+
+on:
+  push:
+    branches: [staging]
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MISE_LOCKED: "1"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging
+    env:
+      TARGET: staging
+    steps:
+      - uses: actions/checkout@SHA
+      - uses: jdx/mise-action@SHA
+      - run: mise run build
+      - run: mise run deploy

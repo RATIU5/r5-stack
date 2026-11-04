@@ -1,39 +1,43 @@
 # Changelog
 
-All notable changes to the plugins in this repository are recorded here, newest first, in one list. Each entry names its plugin and version. Plugins are versioned on their own in `plugin.json`, and a plugin's version changes only when that plugin changes. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+All notable changes to the plugins in this repository are recorded here, newest first, in one list. Each heading names its plugin and version. Plugins are versioned on their own in `plugin.json`, and a plugin's version changes only when that plugin changes. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 2026-11-04
+## [Unreleased]
 
-### r5-pipeline 0.1.0
-#### Added
-- Skill `r5-pipeline` with references for the core toolchain, mise, Knope, GitHub features, Node and Odin, and a record of verified versions.
-- Templates for `mise.toml`, `knope.toml`, the changeset gate, `deps.lock`, the Odin version file generator and the CI, prepare-release, release and promote workflows.
+## [r5-pipeline 0.1.0] - 2026-11-04
+
+### Added
+- Skill `r5-pipeline`: release and CI/CD setup on GitHub with mise, Knope changesets, cocogitto commit checks and GitHub Actions, for any language. Covers pre-releases, staging branches, deploy and promotion, and a hand-off list of GitHub settings.
+- References for the pipeline flow, mise, Knope, GitHub, Node, Bun, Deno, Cloudflare Workers and Odin.
+- Templates for `knope.toml`, `cog.toml`, `.gitignore` and the ci, prepare-release, release, promote and staging workflows.
 - Core rules, injected at session start inside projects that have `mise.toml` or `knope.toml`.
+- Tests in `tests/r5-pipeline`.
 
-## 2026-11-01
+## [r5-odin 0.1.3] - 2026-11-01
 
-### r5-odin 0.1.3
-#### Fixed
+### Fixed
 - The git guard no longer denies a command that only mentions a git command inside quotes, a quoted heredoc or a here-string. Real commands after a heredoc, inside `$( )` or inside `sh -c` are still denied.
 
-### r5-odin 0.1.2
-#### Added
+## [r5-odin 0.1.2] - 2026-11-01
+
+### Added
 - Guard hooks also deny `git pull`, `git rebase`, `git cherry-pick`, `git revert`, `git am`, `gh pr merge` and `gh pr create`.
 - Structural test for manifests, frontmatter, size limits and versions, and an opt-in end-to-end script that checks the hooks in real `claude -p` sessions.
-#### Changed
+
+### Changed
 - The delegation rules call `odin-coder` with an explicit model, and use model haiku for lookups.
 - odx guidance uses `odx explain <rule>` and `odx check --max-findings`.
 - The PreToolUse matcher is anchored.
 - `syntax.md` no longer shows `fallthrough` in its switch example, and the `ffi.md` export examples use a neutral symbol prefix.
 
-### r5-odin 0.1.1
-#### Changed
+## [r5-odin 0.1.1] - 2026-11-01
+
+### Changed
 - Core rule "Short replies." is now "Keep replies very short."
 
-## 2026-10-31
+## [r5-odin 0.1.0] - 2026-10-31
 
-### r5-odin 0.1.0
-#### Added
+### Added
 - Skill `odin` with references for syntax, allocators, C mapping, FFI and idiom checks against the core library.
 - Skill `odin-mode`, a manual-only working procedure for multi-file changes, design choices and bugs with an unknown cause.
 - Agent `odin-coder` for delegated Odin coding, pinned to Sonnet at high effort.
@@ -41,3 +45,10 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - Guard hooks that deny `git commit`, `git push` and `git merge`, deny newly added comment lines in `.odin` edits, and deny the Fable model on Agent calls.
 - Optional odx support. odx is used only when the project root has `odx.json` and `odx --version` succeeds.
 - Hook tests and an `odin test` suite for the allocator reference.
+
+[Unreleased]: https://github.com/RATIU5/r5-stack/commits/main
+[r5-pipeline 0.1.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
+[r5-odin 0.1.3]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
+[r5-odin 0.1.2]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
+[r5-odin 0.1.1]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
+[r5-odin 0.1.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin

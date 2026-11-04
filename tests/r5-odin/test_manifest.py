@@ -34,7 +34,7 @@ def line_count(path):
 
 def changelog_version(plugin):
     text = open(os.path.join(REPO, "CHANGELOG.md"), encoding="utf-8").read()
-    match = re.search(r"^### %s (\S+)$" % re.escape(plugin), text, re.M)
+    match = re.search(r"^## \[%s (\S+)\] - " % re.escape(plugin), text, re.M)
     return match.group(1) if match else None
 
 

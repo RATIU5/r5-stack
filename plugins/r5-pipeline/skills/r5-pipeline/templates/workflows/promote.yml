@@ -33,12 +33,11 @@ jobs:
       TARGET: ${{ inputs.environment }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@SHA
         with:
           ref: ${{ inputs.tag }}
-      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c
+      - uses: jdx/mise-action@SHA
       - run: test "${TAG%%/*}" = "$COMPONENT"
       - run: gh release download "$TAG" --dir dist
-      - run: cd dist && sha256sum --check SHA256SUMS
-      - run: gh attestation verify dist/SHA256SUMS --repo "$GITHUB_REPOSITORY"
+      - run: for f in dist/*; do gh attestation verify "$f" --repo "$GITHUB_REPOSITORY"; done
       - run: mise run deploy
