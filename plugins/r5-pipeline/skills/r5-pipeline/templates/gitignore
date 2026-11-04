@@ -1,0 +1,11 @@
+*
+!*/
+!.gitignore
+!mise.toml
+!mise.lock
+!knope.toml
+!cog.toml
+!CHANGELOG.md
+!.changeset/*.md
+!.github/**
+!scripts/**

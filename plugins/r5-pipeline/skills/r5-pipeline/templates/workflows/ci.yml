@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [BRANCH]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MISE_LOCKED: "1"
+
+jobs:
+  commits:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@SHA
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@SHA
+      - run: mise run lint:commits -- origin/${{ github.base_ref }}..HEAD
+
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@SHA
+      - uses: jdx/mise-action@SHA
+      - run: mise run lint
+      - run: mise run test

@@ -1,0 +1,51 @@
+[packages.app]
+assets = "dist/*"
+versioned_files = ["package.json"]
+changelog = "CHANGELOG.md"
+
+[changes]
+ignore_conventional_commits = true
+
+[[workflows]]
+name = "document-change"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
+
+[[workflows]]
+name = "prepare-release"
+
+[[workflows.steps]]
+type = "Command"
+command = "git switch -c release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+
+[[workflows.steps]]
+type = "Command"
+command = "git commit -a -m 'chore: prepare release'"
+
+[[workflows.steps]]
+type = "Command"
+command = "git push --force --set-upstream origin release"
+
+[[workflows.steps]]
+type = "CreatePullRequest"
+base = "BRANCH"
+
+[workflows.steps.title]
+template = "chore: prepare release"
+
+[workflows.steps.body]
+template = "Created by Knope. Merging this pull request prepares the next release of every changed component."
+
+[[workflows]]
+name = "release"
+
+[[workflows.steps]]
+type = "Release"
+
+[github]
+owner = "OWNER"
+repo = "REPO"
