@@ -1,0 +1,44 @@
+name: promote
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: Component name
+        type: string
+        required: true
+      tag:
+        description: Release tag, component/vX.Y.Z
+        type: string
+        required: true
+      environment:
+        description: Target environment
+        type: environment
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  MISE_LOCKED: "1"
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.environment }}
+    env:
+      COMPONENT: ${{ inputs.component }}
+      TAG: ${{ inputs.tag }}
+      TARGET: ${{ inputs.environment }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c
+      - run: test "${TAG%%/*}" = "$COMPONENT"
+      - run: gh release download "$TAG" --dir dist
+      - run: cd dist && sha256sum --check SHA256SUMS
+      - run: gh attestation verify dist/SHA256SUMS --repo "$GITHUB_REPOSITORY"
+      - run: mise run deploy

@@ -31,3 +31,11 @@ All notable changes to the plugins in this repository are recorded here. The for
 - Guard hooks that deny `git commit`, `git push` and `git merge`, deny newly added comment lines in `.odin` edits, and deny the Fable model on Agent calls.
 - Optional odx support. odx is used only when the project root has `odx.json` and `odx --version` succeeds.
 - Hook tests and an `odin test` suite for the allocator reference.
+
+## r5-pipeline
+
+### [0.1.0] - 2026-11-04
+#### Added
+- Skill `r5-pipeline` with references for the core toolchain, mise, Knope, GitHub features, Node and Odin, and a record of verified versions.
+- Templates for `mise.toml`, `knope.toml`, the changeset gate, `deps.lock`, the Odin version file generator and the CI, prepare-release, release and promote workflows.
+- Core rules, injected at session start inside projects that have `mise.toml` or `knope.toml`.

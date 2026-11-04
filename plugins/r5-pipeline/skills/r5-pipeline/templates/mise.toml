@@ -1,0 +1,30 @@
+[tools]
+cocogitto = "7.0.0"
+"github:knope-dev/knope" = "knope-v0.23.2"
+
+[env]
+BASE_REF = "origin/main"
+
+[tasks.gate]
+description = "Fail when a required changeset is missing or empty"
+run = "bash scripts/gate.sh"
+
+[tasks."lint:commits"]
+description = "Check commit messages against the Conventional Commits spec"
+run = 'cog check --ignore-merge-commits "$BASE_REF..HEAD"'
+
+[tasks."setup:hooks"]
+description = "Install the commit-msg hook"
+run = "cog install-hook commit-msg"
+
+[tasks."release:prepare"]
+description = "Open or refresh the release pull request"
+run = "knope prepare-release --verbose"
+
+[tasks."release:publish"]
+description = "Create tags and GitHub releases for merged versions"
+run = "knope release --verbose"
+
+[tasks.checksums]
+description = "Write dist/SHA256SUMS for the build output"
+run = "cd dist && find . -type f ! -name SHA256SUMS | sed 's|^./||' | xargs shasum -a 256 > SHA256SUMS"
