@@ -4,6 +4,20 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-pipeline 0.2.0] - 2026-11-04
+
+### Added
+- The skill asks whether the repo is solo or team and writes `.github/CODEOWNERS`. Solo repos own everything; team repos can narrow ownership of `.github/` and `mise.toml`.
+
+### Changed
+- The ruleset hand-off requires code owner review for teams only, since a solo author cannot approve their own PR.
+- Core rules: never commit, push or merge unprompted and never ask first. Commit without confirmation when told. End finished work with a review-and-commit suggestion, a short commit message, and a split suggestion for large changes.
+
+## [r5-odin 0.1.4] - 2026-11-04
+
+### Changed
+- Core rules: never commit, push or merge unprompted and never ask first. Commit without confirmation when told. End finished work with a review-and-commit suggestion, a short commit message, and a split suggestion for large changes.
+
 ## [r5-pipeline 0.1.1] - 2026-11-04
 
 ### Changed
@@ -63,6 +77,8 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - Hook tests and an `odin test` suite for the allocator reference.
 
 [Unreleased]: https://github.com/RATIU5/r5-stack/commits/main
+[r5-pipeline 0.2.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
+[r5-odin 0.1.4]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
 [r5-pipeline 0.1.1]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
 [r5-pipeline 0.1.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
 [r5-odin 0.1.3]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin

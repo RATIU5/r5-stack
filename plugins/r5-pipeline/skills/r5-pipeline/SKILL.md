@@ -20,6 +20,7 @@ Ask the user once, in one message, only what you cannot detect:
 - Environments to deploy to. Default: `production` only.
 - Whether a `staging` branch gates production (storefronts). Default: no.
 - The deploy target. Unknown: skip `deploy` and `promote.yml`.
+- Solo or team, and the team handle if any (`@org/team`). Default: solo.
 
 ## CLI first
 - Read `<tool> --help` and `<tool> <subcommand> --help` before use.
@@ -32,7 +33,8 @@ Ask the user once, in one message, only what you cannot detect:
 4. Copy `templates/cog.toml`. Run `mise x -- cog install-hook commit-msg` once. If it fails because hooks are already managed, tell the user and do not overwrite.
 5. Copy `templates/workflows/*` into `.github/workflows/`. Replace tokens, pin actions (`references/github.md`), and delete steps for tasks that do not exist. Add `staging.yml` (and `staging` to the `push` branches in `ci.yml`) only for a staging branch, `promote.yml` only with a deploy target. A component with nothing to ship loses the attest step and `assets` (see `references/pipeline.md`).
 6. No `.gitignore`: copy `templates/gitignore` and add the project's source paths. Run `git add -A -n` and confirm every source and config file is listed. Otherwise leave it.
-7. Check: `mise tasks`, `mise x -- cog --version`, `mise x -- knope --validate`. Commit lint runs on real ranges once the user commits.
+7. No `.github/CODEOWNERS`: write it. Solo: one line, `* @OWNER`. Team: `* @org/team`, plus `/.github/ @org/team` and `/mise.toml @org/team` if a narrower group should own them. The file is only a review request until a ruleset requires it.
+8. Check: `mise tasks`, `mise x -- cog --version`, `mise x -- knope --validate`. Commit lint runs on real ranges once the user commits.
 
 ## Rules
 - Every repeatable project-wide command is a mise task. Workflows call `mise run <task>` and hold no logic.
@@ -49,7 +51,7 @@ Ask the user once, in one message, only what you cannot detect:
 End with this list, filled in with the real names. Wait for the user to confirm. The workflows fail until items 1 and 2 are done, so the user does them before the first push.
 1. Repository secret `RELEASE_TOKEN`: a fine-grained personal access token with Contents and Pull requests write. Settings, Secrets and variables, Actions. GitHub App tokens expire after an hour and do not work here. Its owner cannot approve the release PR, so a second reviewer must exist.
 2. Environments (Settings, Environments), one per answer: `production` gets required reviewers. Add each secret and variable `deploy` reads, per environment. Name them from `scripts/deploy.sh` or the deploy task.
-3. A ruleset on `BRANCH` (and `staging` if used): require pull requests and the checks from `ci.yml`.
+3. A ruleset on `BRANCH` (and `staging` if used): require pull requests and the checks from `ci.yml`. Team: also require code owner review. Solo: do not, since an author cannot approve their own PR and every PR would block; require 0 approvals.
 4. In every other clone: `mise x -- cog install-hook commit-msg`.
 
 ## References
