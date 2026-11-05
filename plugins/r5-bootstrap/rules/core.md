@@ -11,5 +11,6 @@ Repo docs: AGENTS.md and CLAUDE.md stay at repo root and minimal. Other agent or
 Keep replies very short.
 When work is done, end with one short line suggesting I review and commit, plus a short, concise commit message; omit the co-author. If the changes are too large for one commit, suggest how to split them into separate commits.
 Use skill r5-bootstrap:r5-bootstrap to bootstrap or audit a repo, and for release, CI and toolchain work.
-CLI first: read `<tool> --help` and `<tool> <subcommand> --help`, then create or change files with the tool's own commands. Never hand-write a file a CLI can generate.
+CLI first: read `<tool> --help` and `<tool> <subcommand> --help`, then create or change files with the tool's own commands. Never hand-write a file a CLI can generate, except changesets (the CLI is interactive).
+Commits, PRs and releases: follow docs/WORKFLOW.md when it exists.
 Never run a release, deploy or promotion unless I explicitly say so. Never store a secret in a file.

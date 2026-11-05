@@ -1,7 +1,7 @@
 # Pipeline
 
 ## Flow
-1. A dev opens a PR with code and a changeset (`knope document-change`). `ci.yml` runs `pr-title` (the squash message) and `check` (`lint`, `test`). Revert, merge, fixup and squash! titles pass the title check.
+1. A dev opens a PR with code and a changeset (`knope document-change`). `ci.yml` runs `pr-title` (the squash message), `changeset` and `check` (`lint`, `test`). The release PR is exempt from `changeset`. `label-pr.yml` labels the PR with its title type. Local commits may be `Revert "..."`, merge, fixup or squash!; PR titles may not (use `revert: ...`).
 2. Merge to `BRANCH`. `prepare-release.yml` opens or refreshes one release PR: versions, changelog, changesets removed. A push with no changesets skips the step.
 3. Merge the release PR. `release.yml` builds, attests `dist/*`, and `release:publish` creates tags and GitHub releases with the assets.
 4. `promote.yml` (manual) deploys a tag to an environment. Rollback is the same run with an older tag.
@@ -25,7 +25,10 @@ Use when the user wants changes load tested before production (storefronts).
 - Production deploys the release artifact built on `BRANCH`, not the staging build.
 
 ## Pre-releases
-Dispatch `prepare-release.yml` with `alpha`, `beta` or `rc`. Knope numbers them `1.1.0-beta.0`, `1.1.0-beta.1`. A pre-release keeps the changesets; only the stable run deletes them. Dispatch with no label to publish the stable version. Promote a pre-release tag to a non-production environment. A label applies to one run: the next push to `BRANCH` prepares a stable release again, so dispatch with the label after each merge.
+Dispatch `prepare-release.yml` with `alpha`, `beta` or `rc`. Knope numbers them `1.1.0-beta.0`, `1.1.0-beta.1`. A pre-release keeps the changesets; only the stable run deletes them. Dispatch with no label to publish the stable version. Promote a pre-release tag to a non-production environment. A label applies to one run: the next push to `BRANCH` prepares a stable release again, so dispatch with the label after each merge. Merge or close an open pre-release PR before merging other PRs, or the next push replaces it with a stable release PR.
+
+## Fixes and rollback
+Roll forward: a fix PR with a changeset, then a normal release. Roll back production with `promote.yml` and an older tag. There are no support branches; `release.yml` and `prepare-release.yml` run only on `BRANCH`.
 
 ## Monorepo
 - One `[packages.<name>]` per shippable component, each with its own `versioned_files` and `changelog`. A changeset names each component it affects.

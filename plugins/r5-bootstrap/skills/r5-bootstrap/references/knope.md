@@ -28,9 +28,9 @@ web: minor
 
 # Add the thing
 ```
-One `<package>: major|minor|patch` line per component. A stable `prepare-release` deletes the file.
+One `<package>: <type>` line per component. Types: `major`, `minor`, `patch`, plus any type listed in `extra_changelog_sections` (the template has `docs` and `chore`, which add a changelog section and bump the patch version). A stable `prepare-release` deletes the file. Keep only changeset files in `.changeset/`; a `README.md` there breaks `PrepareRelease`. Pending changesets are the unreleased changes; the release PR turns them into the next version heading.
 
 ## Release PR
 The `prepare-release` workflow switches to branch `release`, runs `PrepareRelease`, commits `chore: prepare release`, force-pushes and runs `CreatePullRequest`. Both release workflows match that commit message, so change it in all three places or none.
 Pushes made with `GITHUB_TOKEN` do not trigger workflows, so the release PR needs `RELEASE_TOKEN`.
-`PrepareRelease` fails when no changeset names a known package. The template workflow skips the step when `.changeset/*.md` is empty; a failure after that means a bad package name.
+`PrepareRelease` fails when no changeset names a known package or a file in `.changeset/` has no front matter. The template workflow skips the step when `.changeset/*.md` is empty; a failure after that means a bad package name.

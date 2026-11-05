@@ -14,5 +14,8 @@ Installed by mise: `mise use --pin odin ols` (`ols` provides `odinfmt`). The arc
 - `odx check` only when the project root has `odx.json` and `odx --version` works. Otherwise never run or mention odx.
 - Reuse the project's own flags when it already has them.
 
+## .gitignore allowlist
+Add: `!VERSION`, `!*.odin`, `!odinfmt.json`, and `!vendor/**` when vendored.
+
 ## Dependencies
 Vendor under `vendor/<name>/` or use a git submodule pinned to a commit.

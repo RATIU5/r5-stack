@@ -35,10 +35,11 @@ It only requests review until a ruleset requires code owner review.
 ## What and why
 
 ## Checklist
-- [ ] Changeset added for user-facing changes
+- [ ] PR title is a Conventional Commit
+- [ ] Changeset added
 - [ ] Tests pass
 ```
-Drop the changeset line when the repo has no `knope.toml`.
+Drop the title and changeset lines when the repo has no `knope.toml`.
 
 ## SECURITY.md
 Only for a public repo, and only if the user wants it. Point to GitHub private vulnerability reporting: `Report vulnerabilities at https://github.com/OWNER/REPO/security/advisories/new. Do not open a public issue.` Add the supported versions line only when the project has releases.
@@ -66,7 +67,7 @@ Only when the user says yes. `renovate.json`:
   "semanticCommits": "enabled"
 }
 ```
-`semanticCommits` gives `chore(deps): ...` titles, which pass `pr-title`. The user installs the Renovate GitHub app (hand-off).
+`semanticCommits` gives `chore(deps): ...` titles, which pass `pr-title`. The `changeset` check still applies to Renovate PRs; ask whether Renovate PRs should be exempt (add `renovate/` head branches to `scripts/check-changeset.sh`) or get a changeset another way. The user installs the Renovate GitHub app (hand-off).
 
 ## .gitignore
-No `.gitignore`: copy `templates/gitignore` and add the project's source paths.
+No `.gitignore`: copy `templates/gitignore` and add the allowlist lines from the language reference and the project's source folders. A `.gitignore` that exists stays; extend it only for `dist/` and tool caches.

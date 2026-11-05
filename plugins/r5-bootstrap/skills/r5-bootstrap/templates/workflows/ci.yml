@@ -3,6 +3,7 @@ name: ci
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
+  merge_group:
   push:
     branches: [BRANCH]
 
@@ -30,7 +31,23 @@ jobs:
       - uses: jdx/mise-action@SHA
       - run: mise run lint:title -- "$TITLE"
 
+  changeset:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HEAD_REF: ${{ github.head_ref }}
+      BASE: ${{ github.base_ref }}
+    steps:
+      - uses: actions/checkout@SHA
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: jdx/mise-action@SHA
+      - run: mise run lint:changeset -- "$BASE"
+
   check:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

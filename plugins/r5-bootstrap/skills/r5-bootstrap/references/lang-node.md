@@ -12,6 +12,11 @@ Use what the project already has. Otherwise ask, defaulting to Node with pnpm. P
 
 Cloudflare Workers (`wrangler.toml`, `wrangler.json` or `wrangler.jsonc`) use the row of their package manager. `wrangler` is a project dependency, so `deploy` runs it through the package manager (`pnpm exec wrangler deploy`, `npx wrangler deploy`, `bunx wrangler deploy`).
 
+When `package.json` has `packageManager`, pin that exact version (`mise use --pin pnpm@<version>`) so the frozen install matches the lockfile.
+
+## .gitignore allowlist
+Add: `!package.json`, `!pnpm-lock.yaml` (or `!package-lock.json`, `!bun.lock`, `!deno.json`), `!tsconfig*.json`, `!src/**`, and each source folder the project has.
+
 ## Tasks
 - `deps` runs the install above. `build`, `lint`, `test`, `fmt` depend on `deps` and call the package manager's `run` for the scripts `package.json` has. Add only scripts that exist.
 - `build` writes the release artifact to `dist/`.

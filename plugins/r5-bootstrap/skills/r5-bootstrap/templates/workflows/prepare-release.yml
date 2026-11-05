@@ -8,11 +8,11 @@ on:
       prerelease:
         description: Pre-release label, empty for a stable release
         type: choice
-        options: ["", alpha, beta, rc]
-        default: ""
+        options: [none, alpha, beta, rc]
+        default: none
 
 concurrency:
-  group: prepare-release
+  group: release
   cancel-in-progress: false
 
 permissions: {}
@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    if: "!contains(github.event.head_commit.message, 'chore: prepare release')"
+    if: "github.ref == 'refs/heads/BRANCH' && !startsWith(github.event.head_commit.message, 'chore: prepare release')"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -38,9 +38,9 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
       - uses: jdx/mise-action@SHA
       - id: pending
-        run: if ls .changeset/*.md > /dev/null 2>&1; then echo found=true >> "$GITHUB_OUTPUT"; fi
+        run: if find .changeset -name '*.md' ! -name README.md 2> /dev/null | grep -q .; then echo found=true >> "$GITHUB_OUTPUT"; fi
       - if: steps.pending.outputs.found == 'true'
         run: mise run release:prepare -- ${PRERELEASE:+--prerelease-label "$PRERELEASE"}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          PRERELEASE: ${{ inputs.prerelease }}
+          PRERELEASE: ${{ inputs.prerelease == 'none' && '' || inputs.prerelease }}

@@ -33,7 +33,22 @@ mise tasks add lint:title --description "Check a commit or PR title" -- sh scrip
 mise run lint:title -- "feat: x" > /dev/null || fail "lint:title accepts a conventional title"
 mise run lint:title -- "chore(deps): bump y" > /dev/null || fail "lint:title accepts a scoped title"
 if mise run lint:title -- "bad title" > /dev/null 2>&1; then fail "lint:title rejects a bad title"; fi
+if mise run lint:title -- 'Revert "feat: x"' > /dev/null 2>&1; then fail "lint:title rejects a Revert title"; fi
+if mise run lint:title -- "Feat: x" > /dev/null 2>&1; then fail "lint:title rejects an uppercase type"; fi
 echo "ok   lint:title"
+
+mkdir scripts 2> /dev/null || true
+cp "$skill/templates/scripts/check-changeset.sh" scripts/
+mise tasks add lint:changeset --description "Check the PR adds a changeset" -- sh scripts/check-changeset.sh > /dev/null
+git update-ref refs/remotes/origin/trunk HEAD
+git checkout -q -b topic
+echo y > g && git add g && git commit -qm "feat: more"
+if mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "changeset check fails without a changeset"; fi
+mkdir -p .changeset && printf -- '---\napp: patch\n---\n\n# x\n' > .changeset/x.md && git add -A && git commit -qm "chore: add changeset"
+mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes with a changeset"
+HEAD_REF=release mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "release branch is exempt"
+git checkout -q trunk
+echo "ok   changeset check"
 
 cat > knope.toml <<'KNOPE'
 [packages.app]
@@ -91,8 +106,15 @@ echo "ok   task args"
 
 mkdir ignore && cd ignore && git init -q
 cp "$skill/templates/gitignore" .gitignore
-mkdir -p .changeset .github/workflows dist
-touch mise.toml .changeset/a.md .github/workflows/ci.yml dist/out other.txt
-listed=$(git add -A -n | sed "s/^add '//; s/'$//" | sort | tr '\n' ' ')
-[ "$listed" = ".changeset/a.md .github/workflows/ci.yml .gitignore mise.toml " ] || fail "gitignore allowlist: $listed"
+mkdir -p .changeset .github/workflows dist docs
+touch mise.toml .changeset/a.md .github/workflows/ci.yml dist/out other.txt docs/WORKFLOW.md README.md AGENTS.md
+listed=$(git add -A -n | sed "s/^add '//; s/'$//" | LC_ALL=C sort | tr '\n' ' ')
+[ "$listed" = ".changeset/a.md .github/workflows/ci.yml .gitignore AGENTS.md README.md docs/WORKFLOW.md mise.toml " ] || fail "gitignore allowlist: $listed"
 echo "ok   gitignore allowlist"
+
+mkdir -p lint/.github/workflows
+for f in "$skill"/templates/workflows/*.yml; do
+  sed 's/@SHA/@0123456789abcdef0123456789abcdef01234567/; s/BRANCH/main/g' "$f" > "lint/.github/workflows/$(basename "$f")"
+done
+(cd lint && git init -q && mise x github:rhysd/actionlint -- actionlint) || fail "actionlint on rendered workflows"
+echo "ok   actionlint"

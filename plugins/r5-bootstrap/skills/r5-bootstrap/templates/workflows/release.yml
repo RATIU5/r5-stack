@@ -19,7 +19,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    if: "contains(github.event.head_commit.message, 'chore: prepare release')"
+    if: "startsWith(github.event.head_commit.message, 'chore: prepare release')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

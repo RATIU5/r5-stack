@@ -11,7 +11,13 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - r5-bootstrap: `prepare-release.yml` skips when no changeset exists and passes the pre-release label through `env`. `assets` is per component. Deploy secrets are mapped into the deploy step.
 - r5-bootstrap: Odin setup pins `ols` for `odinfmt`. Knope notes now match tested behavior (pre-release keeps changesets, `$version` works with one package).
 
+### Fixed
+- r5-bootstrap: the release trigger matches the commit subject only. The pre-release input no longer fails actionlint, the pending-changeset check ignores `.changeset/README.md`, release and prepare-release share one concurrency group, and `prepare-release` runs only on `BRANCH`. PR titles reject `Revert "..."` and uppercase types; local commits still allow them. The commit hook skips quietly without mise.
+- r5-bootstrap: `.gitignore` allowlist covers docs, README, LICENSE, `.editorconfig`, `AGENTS.md` and per-language source files.
+
 ### Added
+- r5-bootstrap: `docs/WORKFLOW.md` template (commits, PRs, changesets, checks, release) with an `AGENTS.md` or `CLAUDE.md` pointer, a required `changeset` CI check, PR labels by title type, a stale PR workflow, and `merge_group` support. Tests assert the doc matches the CI jobs and mise tasks, and actionlint checks the rendered workflows.
+- r5-bootstrap: `docs` and `chore` changeset types, `core.hooksPath` handling, a guard for repos without commits, and a `pnpm` pin that follows `packageManager`.
 - r5-bootstrap: `.editorconfig`, opt-in Renovate config, and handling for a missing `origin`, existing tags, existing commit hooks and non-GitHub remotes.
 
 ## [r5-bootstrap 0.2.0] - 2026-11-04

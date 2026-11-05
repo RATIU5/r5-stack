@@ -2,6 +2,7 @@
 assets = "dist/app*"
 versioned_files = ["package.json"]
 changelog = "CHANGELOG.md"
+extra_changelog_sections = [{ name = "Documentation", types = ["docs"] }, { name = "Maintenance", types = ["chore"] }]
 
 [changes]
 ignore_conventional_commits = true

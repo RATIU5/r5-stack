@@ -19,13 +19,14 @@ One row per environment from the answers.
 
 ## 4. Ruleset on BRANCH (and staging if used)
 - Require a pull request. Approvals: solo 0, team 1. Team: require code owner review. Solo: leave it off, since an author cannot approve their own PR.
-- Required status checks: `pr-title` and `check`, plus `build` if `ci.yml` has that job.
+- Required status checks: `pr-title`, `changeset` and `check` (the jobs `ci.yml` has).
 - Block force pushes and deletion. Require linear history only without a staging branch; with one, the `staging` into `BRANCH` merge needs a merge commit.
 - A PAT owner cannot approve the release PR, so a team needs a second reviewer or a GitHub App token.
 
 ## 5. Repository settings
 - Merge: squash. With a staging branch also allow merge commits. Automatically delete head branches.
 - Squash commit message: pull request title. `pr-title` then validates what lands on `BRANCH`.
+- Merge queue, if used: `ci.yml` already listens for `merge_group`.
 - Public repo: enable secret scanning, push protection and private vulnerability reporting.
 - Actions: workflow permissions read-only by default.
 - Renovate added: install the Renovate GitHub app on the repo.
