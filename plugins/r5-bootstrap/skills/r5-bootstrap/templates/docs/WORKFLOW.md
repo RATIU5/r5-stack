@@ -8,14 +8,15 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 3. Title the PR the same way. The PR title becomes the squash commit on `BRANCH`.
 4. Every PR adds one changeset file.
 5. Merge the release PR to ship. Never tag or publish by hand.
+6. Only a person merges a PR. Agents never merge and never enable auto-merge.
 
 ## Commits
-- Format: `type(scope): summary`. Scope is optional. Add `!` before the colon for a breaking change.
+- Format: `type(scope): summary`. Scope is required: the component or area, such as `api`, `ci`, `docs` or `deps`. Add `!` before the colon for a breaking change.
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
 - Lowercase type, imperative summary, no trailing period.
 - The commit-msg hook checks each local commit. Install it once per clone: `mise x -- cog install-hook commit-msg`.
 - Never commit with `--no-verify`. CI checks the PR title either way.
-- Revert with a title like `revert: feat: add x`.
+- Revert with a title like `revert(api): add x`.
 
 ## Pull requests
 - Title: same format as a commit. CI labels the PR with its type.
@@ -25,7 +26,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 - Workflows on pull requests never get secrets. Do not add any.
 
 ## Changesets
-A changeset is a file `.changeset/<short-name>.md`. Every PR needs one. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
+A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate, Dependabot) and the release PR do not. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
 ```
 ---
 app: minor
@@ -43,8 +44,8 @@ app: minor
 ## Checks
 | Check | Enforces | Run locally |
 |---|---|---|
-| `pr-title` | PR title is a Conventional Commit | `mise run lint:title -- "feat: x"` |
-| `changeset` | PR adds a changeset (the release PR is exempt) | `mise run lint:changeset -- BRANCH` |
+| `pr-title` | PR title is a Conventional Commit | `mise run lint:title -- "feat(api): x"` |
+| `changeset` | PR adds a changeset (bot, app and release PRs are exempt) | `mise run lint:changeset -- BRANCH` |
 | `check` | lint and tests pass | `mise run lint`, `mise run test` |
 | commit-msg hook | each local commit message | runs on `git commit` |
 

@@ -38,6 +38,7 @@ jobs:
     env:
       HEAD_REF: ${{ github.head_ref }}
       BASE: ${{ github.base_ref }}
+      AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
     steps:
       - uses: actions/checkout@SHA
         with:

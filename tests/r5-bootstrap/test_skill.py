@@ -62,7 +62,7 @@ for name in ("templates/knope.toml", "templates/workflows/release.yml", "templat
 expect("SKILL.md: every template and script it names exists",
        all(os.path.exists(os.path.join(SKILL, p)) for p in
            ("templates/scripts/lint-commit.sh", "templates/scripts/check-changeset.sh", "templates/scripts/label-pr.sh",
-            "templates/docs/WORKFLOW.md", "templates/workflows/label-pr.yml", "templates/workflows/stale.yml")))
+            "templates/docs/WORKFLOW.md", "references/migrate.md", "templates/workflows/label-pr.yml", "templates/workflows/stale.yml")))
 
 hook = os.path.join(PLUGIN, "scripts", "session_start.py")
 

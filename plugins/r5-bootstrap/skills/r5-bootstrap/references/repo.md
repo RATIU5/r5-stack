@@ -67,7 +67,7 @@ Only when the user says yes. `renovate.json`:
   "semanticCommits": "enabled"
 }
 ```
-`semanticCommits` gives `chore(deps): ...` titles, which pass `pr-title`. The `changeset` check still applies to Renovate PRs; ask whether Renovate PRs should be exempt (add `renovate/` head branches to `scripts/check-changeset.sh`) or get a changeset another way. The user installs the Renovate GitHub app (hand-off).
+`semanticCommits` gives `chore(deps): ...` titles, which pass `pr-title`. The `changeset` check skips PRs created by bots and apps, so Renovate PRs need no changeset. The user installs the Renovate GitHub app (hand-off).
 
 ## .gitignore
-No `.gitignore`: copy `templates/gitignore` and add the allowlist lines from the language reference and the project's source folders. A `.gitignore` that exists stays; extend it only for `dist/` and tool caches.
+Always the allowlist form. No `.gitignore`: copy `templates/gitignore` and add the allowlist lines from the language reference and the project's source folders. An existing `.gitignore` is converted as in `references/migrate.md`.

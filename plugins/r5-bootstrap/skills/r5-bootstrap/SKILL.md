@@ -1,17 +1,17 @@
 ---
 name: r5-bootstrap
-description: Bootstrap a GitHub repository for any language or audit one for gaps. Sets up only what is missing (README, license, CODEOWNERS, PR template, editorconfig, mise toolchain, Knope changesets, cocogitto commit and PR title checks, GitHub Actions release, staging and promotion), then hands off GitHub settings and secrets.
+description: Bootstrap a GitHub repository for any language, or migrate and update an existing one to the same workflow. Audits first, asks before changing existing files, and sets up what is missing (README, license, CODEOWNERS, PR template, editorconfig, mise toolchain, Knope changesets, cocogitto commit and PR title checks, GitHub Actions release, staging and promotion), then hands off GitHub settings and secrets.
 ---
 
 # r5-bootstrap
 
 ## Audit first
-Before asking anything, read the repo and print one table: each part below as `present`, `missing` or `skipped (reason)`. Keep it as the task list and update it as parts finish. Set up only `missing` parts. Existing files win over templates.
+Before asking anything, read the repo and print one table: each part below as `present`, `partial`, `different`, `missing` or `skipped (reason)`. Keep it as the task list and update it as parts finish. Set up `missing` parts. For `partial` and `different` parts, and for any repo that already has some of the stack, follow `references/migrate.md`: compare with the templates and ask the user part by part. The end state is the same everywhere: every part complete. Never overwrite an existing file unasked.
 
 | Part | Present when |
 |---|---|
 | Source and toolchain | a language manifest or source files; `mise.toml` |
-| `.gitignore` | file exists |
+| `.gitignore` | in allowlist form (`*` first, then `!` lines) |
 | README | `README*` exists |
 | LICENSE | `LICENSE*` exists; skip unless the user names a license |
 | CODEOWNERS | `.github/CODEOWNERS` exists |
@@ -62,15 +62,15 @@ Required checks and the commit convention (Conventional Commits) use the default
 - Create and change files with the tool (`mise use --pin`, `mise tasks add`) and review the result. Copy a template only when no command makes the file. `knope --generate` and `knope document-change` are interactive: do not run them.
 
 ## Set up
-Only for parts the audit marked `missing`. Templates for repo files are in `references/repo.md`.
+For `missing` parts as written below. For `partial` and `different` parts, apply the same steps through `references/migrate.md`. Templates for repo files are in `references/repo.md`.
 1. `mise use --pin cocogitto github:knope-dev/knope <language tools>`, then `mise lock`.
 2. Add project-global tasks with `mise tasks add` (commands in `references/mise.md`): `build`, `lint`, `test`, `fmt` where the project has them, plus `lint:title`, `lint:changeset`, `label:pr`, `release:prepare`, `release:publish`, and `deploy` when the target is known. Leave out anything else. Per-package tasks (`dev:<name>`) only for packages that exist now.
 3. Copy `templates/knope.toml`, set components and `versioned_files`. Validate it after the user's first commit; before any commit `knope --validate` fails.
 4. Copy `templates/cog.toml` and `templates/scripts/*` (to `scripts/`, executable). If `git config core.hooksPath` is set, put a `commit-msg` file in that directory that runs `mise x -- sh scripts/lint-commit.sh --file "$1"` (after the user agrees); otherwise run `mise x -- cog install-hook commit-msg` once. Prove it: `git commit` with a bad message must fail.
 5. Copy `templates/workflows/*` into `.github/workflows/`. Replace tokens, pin actions (`references/github.md`), and delete steps for tasks that do not exist (`check` may end with none; keep the job only if it has steps). With no `build` task, `release.yml` and `knope.toml` lose the build, attest step and `assets`. Add `staging.yml` (and `staging` to the `push` branches in `ci.yml`) only for a staging branch, `promote.yml` only with a deploy target. A component with nothing to ship, or a private repo without GitHub Enterprise Cloud, loses the attest step and `assets` (see `references/pipeline.md`). Add `env: NAME: ${{ secrets.NAME }}` to the `deploy` step for every deploy secret; environment secrets are not exported on their own.
-6. `.gitignore`, README, LICENSE, CODEOWNERS, PR template, `.editorconfig`, `SECURITY.md`, and `renovate.json` only if the user said yes: write the missing ones from `references/repo.md`. Add the language's allowlist lines to `.gitignore` (`references/lang-*.md`). Run `git add -A -n` and confirm every source and config file is listed.
+6. `.gitignore`, README, LICENSE, CODEOWNERS, PR template, `.editorconfig`, `SECURITY.md`, and `renovate.json` only if the user said yes: write the missing ones from `references/repo.md`. An existing `.gitignore` is converted to the allowlist form (`references/migrate.md`). Add the language's allowlist lines (`references/lang-*.md`). Run `git add -A -n` and confirm every source and config file is listed.
 7. Copy `templates/docs/WORKFLOW.md` to `docs/WORKFLOW.md`, replace `BRANCH`, and drop rows or sections for parts that were skipped. Add one line to `AGENTS.md` or `CLAUDE.md`: `Commits, PRs and releases: follow docs/WORKFLOW.md.` Create a minimal `AGENTS.md` holding only that line when neither exists.
-8. Check: `mise tasks`, `mise x -- cog --version`. Test `mise run lint:title -- "feat: x"` passes and `-- "bad"` fails.
+8. Check: `mise tasks`, `mise x -- cog --version`. Test `mise run lint:title -- "feat(app): x"` passes and `-- "feat: x"` and `-- "bad"` fail.
 
 ## Rules
 - Every repeatable project-wide command is a mise task. Workflows call `mise run <task>` and hold no logic.
@@ -81,7 +81,7 @@ Only for parts the audit marked `missing`. Templates for repo files are in `refe
 - Build once. Promotion and rollback deploy the release artifact after `gh attestation verify`.
 - Pre-release: dispatch `prepare-release.yml` with a label (alpha, beta, rc). Dispatch with none to graduate.
 - No comments in generated or templated files.
-- Never run a release, deploy or promotion. Never push or open a PR. Never write a secret to a file.
+- Never run a release, deploy or promotion. Never push, open or merge a PR, and never enable auto-merge: only the user merges. Never write a secret to a file.
 
 ## Hand off to the user
 End with the template in `references/handoff.md`, filled with the real names, same sections in the same order. Apply nothing to GitHub yourself. Wait for the user to confirm. The workflows fail until the secrets and environments exist, so the user does them before the first push.
@@ -91,6 +91,7 @@ End with the template in `references/handoff.md`, filled with the real names, sa
 - `references/mise.md`, `references/knope.md`: tasks, lock, tool names; Knope config, changesets, release PR.
 - `references/github.md`: action pinning, environments, rulesets, attestation, promotion.
 - `references/repo.md`: README, LICENSE, CODEOWNERS, PR template, .editorconfig, SECURITY.md, Renovate, .gitignore.
+- `references/migrate.md`: migrating a repo that has part of the stack, and updating one set up earlier.
 - `references/handoff.md`: the hand-off template and defaults.
 - `references/lang-node.md`, `references/lang-odin.md`: language specifics.
 - `templates/`: `knope.toml`, `cog.toml`, `gitignore`, `scripts/`, `workflows/`, `docs/WORKFLOW.md`.

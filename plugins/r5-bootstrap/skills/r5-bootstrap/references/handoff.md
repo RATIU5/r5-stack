@@ -24,7 +24,7 @@ One row per environment from the answers.
 - A PAT owner cannot approve the release PR, so a team needs a second reviewer or a GitHub App token.
 
 ## 5. Repository settings
-- Merge: squash. With a staging branch also allow merge commits. Automatically delete head branches.
+- Merge: squash. With a staging branch also allow merge commits. Automatically delete head branches. Leave auto-merge off: only a person merges.
 - Squash commit message: pull request title. `pr-title` then validates what lands on `BRANCH`.
 - Merge queue, if used: `ci.yml` already listens for `merge_group`.
 - Public repo: enable secret scanning, push protection and private vulnerability reporting.

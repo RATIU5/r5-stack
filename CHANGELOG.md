@@ -15,7 +15,12 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - r5-bootstrap: the release trigger matches the commit subject only. The pre-release input no longer fails actionlint, the pending-changeset check ignores `.changeset/README.md`, release and prepare-release share one concurrency group, and `prepare-release` runs only on `BRANCH`. PR titles reject `Revert "..."` and uppercase types; local commits still allow them. The commit hook skips quietly without mise.
 - r5-bootstrap: `.gitignore` allowlist covers docs, README, LICENSE, `.editorconfig`, `AGENTS.md` and per-language source files.
 
+### Changed
+- r5-bootstrap: commit messages and PR titles must have a scope (`feat(api): x`). `feat: x` is rejected by the hook and the `pr-title` check.
+
 ### Added
+- r5-bootstrap: `references/migrate.md`, one flow to migrate a repo that has part of the stack or update one set up earlier. The audit classes each part `present`, `partial`, `different` or `missing`, diffs files against the templates, and asks part by part before changing existing files. An existing `.gitignore` is converted to the allowlist form.
+- r5-bootstrap: the `changeset` check skips PRs created by bots and apps. People and agents still need a changeset. The skill, rules and WORKFLOW.md state that only a person merges and that auto-merge stays off.
 - r5-bootstrap: `docs/WORKFLOW.md` template (commits, PRs, changesets, checks, release) with an `AGENTS.md` or `CLAUDE.md` pointer, a required `changeset` CI check, PR labels by title type, a stale PR workflow, and `merge_group` support. Tests assert the doc matches the CI jobs and mise tasks, and actionlint checks the rendered workflows.
 - r5-bootstrap: `docs` and `chore` changeset types, `core.hooksPath` handling, a guard for repos without commits, and a `pnpm` pin that follows `packageManager`.
 - r5-bootstrap: `.editorconfig`, opt-in Renovate config, and handling for a missing `origin`, existing tags, existing commit hooks and non-GitHub remotes.

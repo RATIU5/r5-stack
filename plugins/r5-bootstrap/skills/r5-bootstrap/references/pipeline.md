@@ -1,7 +1,7 @@
 # Pipeline
 
 ## Flow
-1. A dev opens a PR with code and a changeset (`knope document-change`). `ci.yml` runs `pr-title` (the squash message), `changeset` and `check` (`lint`, `test`). The release PR is exempt from `changeset`. `label-pr.yml` labels the PR with its title type. Local commits may be `Revert "..."`, merge, fixup or squash!; PR titles may not (use `revert: ...`).
+1. A dev opens a PR with code and a changeset (`knope document-change`). `ci.yml` runs `pr-title` (the squash message), `changeset` and `check` (`lint`, `test`). The release PR and PRs created by bots or apps (Renovate, Dependabot) are exempt from `changeset`; every PR from a person or an agent acting as one needs it. `label-pr.yml` labels the PR with its title type. Local commits may be `Revert "..."`, merge, fixup or squash!; PR titles may not (use `revert(scope): ...`). Every title needs a scope.
 2. Merge to `BRANCH`. `prepare-release.yml` opens or refreshes one release PR: versions, changelog, changesets removed. A push with no changesets skips the step.
 3. Merge the release PR. `release.yml` builds, attests `dist/*`, and `release:publish` creates tags and GitHub releases with the assets.
 4. `promote.yml` (manual) deploys a tag to an environment. Rollback is the same run with an older tag.

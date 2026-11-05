@@ -9,7 +9,11 @@ else
   msg=$1
 fi
 case $msg in
-  [!a-z]*) echo "Start with a lowercase type, for example 'revert: ...' or 'feat: ...'." >&2; exit 1 ;;
+  [!a-z]*) echo "Start with a lowercase type, for example 'revert(api): ...' or 'feat(api): ...'." >&2; exit 1 ;;
+esac
+case $msg in
+  [a-z]*'('?*')'*:\ *|[a-z]*'('?*')!'*:\ *) ;;
+  *) echo "A scope is required: type(scope): summary." >&2; exit 1 ;;
 esac
 if [ "$1" = --file ]; then
   exec cog verify --file "$2"
