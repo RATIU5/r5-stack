@@ -1,0 +1,30 @@
+name: label-pr
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened]
+
+permissions: {}
+
+env:
+  MISE_LOCKED: "1"
+
+jobs:
+  label:
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TITLE: ${{ github.event.pull_request.title }}
+      PR: ${{ github.event.pull_request.number }}
+    steps:
+      - uses: actions/checkout@SHA
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@SHA
+      - run: mise run label:pr

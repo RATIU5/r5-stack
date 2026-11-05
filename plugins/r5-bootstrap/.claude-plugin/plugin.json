@@ -1,0 +1,13 @@
+{
+  "name": "r5-bootstrap",
+  "version": "0.3.0",
+  "description": "Bootstrap, migrate and audit a GitHub repository for Claude Code: repo files, workflow doc, mise, Knope, cocogitto and GitHub Actions, then a settings hand-off",
+  "author": {
+    "name": "John Memmott",
+    "url": "https://github.com/RATIU5"
+  },
+  "repository": "https://github.com/RATIU5/r5-stack",
+  "homepage": "https://github.com/RATIU5/r5-stack",
+  "license": "MIT",
+  "keywords": ["bootstrap", "init", "mise", "knope", "cocogitto", "release", "ci", "github-actions"]
+}

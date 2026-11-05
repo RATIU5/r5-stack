@@ -16,11 +16,11 @@
       "tags": ["odin"]
     },
     {
-      "name": "r5-pipeline",
-      "source": "./plugins/r5-pipeline",
-      "description": "Release and CI/CD toolchain skill: mise, Knope, cocogitto, GitHub Actions",
+      "name": "r5-bootstrap",
+      "source": "./plugins/r5-bootstrap",
+      "description": "Bootstrap and audit a GitHub repo: repo files, mise, Knope, cocogitto, GitHub Actions",
       "category": "development",
-      "tags": ["release", "ci", "mise", "knope"]
+      "tags": ["bootstrap", "release", "ci", "mise", "knope"]
     }
   ]
 }

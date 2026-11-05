@@ -5,7 +5,7 @@ My personal Claude Code plugins for various programming languages and tasks.
 | Plugin    | What it does                                                                                       |
 | --------- | -------------------------------------------------------------------------------------------------- |
 | `r5-odin` | Rules, skills, an agent and guard hooks for writing Odin, including allocators, C mapping and FFI. |
-| `r5-pipeline` | A skill and templates for release and CI/CD on GitHub in any language: mise, Knope, cocogitto, GitHub Actions. |
+| `r5-bootstrap` | A skill that audits a repo and sets up what is missing: README, CODEOWNERS, mise, Knope, cocogitto, GitHub Actions, plus a GitHub settings hand-off. |
 
 ## Install
 
@@ -14,7 +14,7 @@ In Claude Code:
 ```
 /plugin marketplace add RATIU5/r5-stack
 /plugin install r5-odin@r5-stack
-/plugin install r5-pipeline@r5-stack
+/plugin install r5-bootstrap@r5-stack
 ```
 
 Or from a shell:
@@ -22,7 +22,7 @@ Or from a shell:
 ```bash
 claude plugin marketplace add RATIU5/r5-stack
 claude plugin install r5-odin@r5-stack
-claude plugin install r5-pipeline@r5-stack
+claude plugin install r5-bootstrap@r5-stack
 ```
 
 ### Requirements
@@ -35,8 +35,17 @@ claude plugin install r5-pipeline@r5-stack
 
 ```
 .claude-plugin/marketplace.json
-plugins/r5-odin/           the plugin
+plugins/r5-odin/           Odin plugin
+plugins/r5-bootstrap/      repo bootstrap plugin
 tests/r5-odin/             hook tests and the allocator test suite
+tests/r5-bootstrap/        skill checks and an end-to-end tool test
+```
+
+r5-bootstrap tests (`e2e.sh` needs mise and network):
+
+```bash
+python3 -I tests/r5-bootstrap/test_skill.py
+tests/r5-bootstrap/e2e.sh
 ```
 
 Run the tests from the repo root:

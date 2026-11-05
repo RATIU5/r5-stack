@@ -4,9 +4,41 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
-## [r5-pipeline 0.2.0] - 2026-11-04
+## [r5-bootstrap 0.3.0] - 2026-11-05
+
+### Changed
+- r5-bootstrap: the SessionStart hook injects the core rules in every repo, including new ones with no `mise.toml`.
+- r5-bootstrap: CI checks the PR title (`pr-title`) instead of every commit. The commit-msg hook and title check skip Revert, merge, fixup and squash commits through `scripts/lint-commit.sh`.
+- r5-bootstrap: hand-off lists the real CI job names, allows merge commits when a staging branch exists, offers GitHub App tokens, and drops the commit message ruleset and tag restriction advice.
+- r5-bootstrap: `prepare-release.yml` skips when no changeset exists and passes the pre-release label through `env`. `assets` is per component. Deploy secrets are mapped into the deploy step.
+- r5-bootstrap: Odin setup pins `ols` for `odinfmt`. Knope notes now match tested behavior (pre-release keeps changesets, `$version` works with one package).
+
+### Fixed
+- r5-bootstrap: the release trigger matches the commit subject only. The pre-release input no longer fails actionlint, the pending-changeset check ignores `.changeset/README.md`, release and prepare-release share one concurrency group, and `prepare-release` runs only on `BRANCH`. PR titles reject `Revert "..."` and uppercase types; local commits still allow them. The commit hook skips quietly without mise.
+- r5-bootstrap: `.gitignore` allowlist covers docs, README, LICENSE, `.editorconfig`, `AGENTS.md` and per-language source files.
+
+### Changed
+- r5-bootstrap: condensed `SKILL.md` and the references (each fact now lives in one file), batched all questions into one message, and made migrate ask before overwriting `.gitignore`. The release PR is exempt from `pr-title`, since Knope titles it `chore: prepare release`. The migrate flow now handles `core.hooksPath`, husky 9, Keep-a-Changelog headings, old tag formats, a missing lockfile and a stale required check.
+- r5-bootstrap: commit messages and PR titles must have a scope (`feat(api): x`). `feat: x` is rejected by the hook and the `pr-title` check.
 
 ### Added
+- r5-bootstrap: `references/migrate.md`, one flow to migrate a repo that has part of the stack or update one set up earlier. The audit classes each part `present`, `partial`, `different` or `missing`, diffs files against the templates, and asks part by part before changing existing files. An existing `.gitignore` is converted to the allowlist form.
+- r5-bootstrap: the `changeset` check skips PRs created by bots and apps. People and agents still need a changeset. The skill, rules and WORKFLOW.md state that only a person merges and that auto-merge stays off.
+- r5-bootstrap: `docs/WORKFLOW.md` template (commits, PRs, changesets, checks, release) with an `AGENTS.md` or `CLAUDE.md` pointer, a required `changeset` CI check, PR labels by title type, a stale PR workflow, and `merge_group` support. Tests assert the doc matches the CI jobs and mise tasks, and actionlint checks the rendered workflows.
+- r5-bootstrap: `docs` and `chore` changeset types, `core.hooksPath` handling, a guard for repos without commits, and a `pnpm` pin that follows `packageManager`.
+- r5-bootstrap: `.editorconfig`, opt-in Renovate config, and handling for a missing `origin`, existing tags, existing commit hooks and non-GitHub remotes.
+
+## [r5-bootstrap 0.2.0] - 2026-11-04
+
+### Changed
+- BREAKING: plugin and skill `r5-pipeline` renamed to `r5-bootstrap`, and the tests moved to `tests/r5-bootstrap`. Reinstall with `/plugin install r5-bootstrap@r5-stack`. The version stays 0.2.0.
+- The skill audits the repo first, prints each part as present, missing or skipped, and sets up only what is missing. It asks for language, package manager and project kind only when none exists and the prompt names none, and uses defaults for the rest.
+- The skill researches a tool's `--help` before writing its config.
+- The hand-off follows a fixed template in `references/handoff.md`.
+
+### Added
+- `references/repo.md`: small README, LICENSE on request, PR template and `SECURITY.md` for public repos.
+- Node projects default to the oxc toolchain (`oxlint`, `oxfmt`, plus `tsc --noEmit` for TypeScript). Odin projects get `odinfmt` and optional `odx`.
 - The skill asks whether the repo is solo or team and writes `.github/CODEOWNERS`. Solo repos own everything; team repos can narrow ownership of `.github/` and `mise.toml`.
 
 ### Changed
@@ -77,7 +109,7 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - Hook tests and an `odin test` suite for the allocator reference.
 
 [Unreleased]: https://github.com/RATIU5/r5-stack/commits/main
-[r5-pipeline 0.2.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
+[r5-bootstrap 0.2.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-bootstrap
 [r5-odin 0.1.4]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
 [r5-pipeline 0.1.1]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
 [r5-pipeline 0.1.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
