@@ -26,7 +26,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 - Workflows on pull requests never get secrets. Do not add any.
 
 ## Changesets
-A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate, Dependabot) and the release PR do not. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
+A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate) and the release PR do not. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
 ```
 ---
 app: minor

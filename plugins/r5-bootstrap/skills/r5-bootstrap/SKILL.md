@@ -16,7 +16,7 @@ Read the repo, then print one table: each part below as `present`, `partial`, `d
 | CODEOWNERS, PR template | `.github/CODEOWNERS`, `.github/pull_request_template.md` |
 | `.editorconfig` | file exists |
 | `SECURITY.md` | exists; offer only for a public repo |
-| Renovate | `renovate.json` or Dependabot config; add only when the user says yes |
+| Renovate | `renovate.json`; add only when the user says yes. An existing Dependabot config counts as `different` |
 | Workflow doc | `docs/WORKFLOW.md`, and `AGENTS.md` or `CLAUDE.md` points to it |
 | Commit and PR checks | `cog.toml`, `scripts/lint-commit.sh`, `scripts/check-changeset.sh`, a working commit-msg hook, `pr-title` and `changeset` jobs |
 | Release | `knope.toml`, `release.yml`, `prepare-release.yml` |

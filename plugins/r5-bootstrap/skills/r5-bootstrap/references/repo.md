@@ -56,7 +56,7 @@ indent_size = SIZE
 Node: `space`, `2`. Odin: `tab`, no `indent_size`. Otherwise copy the style of existing files or drop both indent lines. Match a formatter config when present.
 
 ## Renovate
-Only on a yes. `renovate.json`:
+Renovate is the only dependency updater offered, never Dependabot. Only on a yes. `renovate.json`:
 ```
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -64,7 +64,7 @@ Only on a yes. `renovate.json`:
   "semanticCommits": "enabled"
 }
 ```
-`semanticCommits` gives `chore(deps): ...` titles that pass `pr-title`. The `changeset` check skips bot PRs. Dependabot needs `commit-message.prefix: "chore(deps)"` in its config for the same. The user installs the Renovate GitHub app.
+`semanticCommits` gives `chore(deps): ...` titles that pass `pr-title`. The `changeset` check skips bot PRs. The user installs the Renovate GitHub app.
 
 ## .gitignore
 Always the allowlist form: copy `templates/gitignore`, add the language lines and the project's source folders. An existing file is converted as in `references/migrate.md`.

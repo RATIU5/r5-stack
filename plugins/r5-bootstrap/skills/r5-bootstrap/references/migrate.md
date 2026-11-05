@@ -34,6 +34,7 @@ Send one message listing every `partial` and `different` part with the diff or g
 - Repo visibility unknown (`gh` cannot see the repo): ask; default private, which drops attest and `assets`.
 - Tags: Knope cannot keep `vX.Y.Z` with `[packages.<name>]`. Default: new format, and alias tags for the latest version (`git tag <name>/vX.Y.Z vX.Y.Z^{}`) for the user to push. Without them `knope release` re-releases the current version.
 - `.gitignore`: show the diff against the allowlist and convert (below). Default convert.
+- Dependabot config present: offer Renovate instead (`references/repo.md`). Default keep Dependabot; its bot PRs are exempt from `changeset`, and its titles need `commit-message.prefix: "chore(deps)"` to pass `pr-title`.
 - Start each component at its latest tag's version in `versioned_files`.
 - No lockfile: ask to run `<pm> install` once so the user commits it.
 - A bootstrap PR itself needs a changeset: write `.changeset/bootstrap.md` with `<component>: chore`. Default yes.
