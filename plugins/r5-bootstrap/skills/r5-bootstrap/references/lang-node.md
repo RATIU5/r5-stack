@@ -12,6 +12,8 @@ Use what the project already has. Otherwise ask, defaulting to Node with pnpm. P
 
 Cloudflare Workers (`wrangler.toml`, `wrangler.json` or `wrangler.jsonc`) use the row of their package manager. `wrangler` is a project dependency, so `deploy` runs it through the package manager (`pnpm exec wrangler deploy`, `npx wrangler deploy`, `bunx wrangler deploy`).
 
+No lockfile: the frozen install fails. Ask the user to run `<pm> install` once and commit the lockfile.
+
 When `package.json` has `packageManager`, pin that exact version (`mise use --pin pnpm@<version>`) so the frozen install matches the lockfile.
 
 ## .gitignore allowlist

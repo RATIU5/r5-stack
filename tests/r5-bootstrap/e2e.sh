@@ -50,7 +50,7 @@ AUTHOR_TYPE=Bot mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "bot P
 if AUTHOR_TYPE=User mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "user PRs are not exempt"; fi
 mkdir -p .changeset && printf -- '---\napp: patch\n---\n\n# x\n' > .changeset/x.md && git add -A && git commit -qm "chore(app): add changeset"
 mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes with a changeset"
-HEAD_REF=release mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "release branch is exempt"
+HEAD_REF=release SAME_REPO=true mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "release branch is exempt"
 git checkout -q trunk
 echo "ok   changeset check"
 

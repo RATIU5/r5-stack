@@ -16,6 +16,7 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - r5-bootstrap: `.gitignore` allowlist covers docs, README, LICENSE, `.editorconfig`, `AGENTS.md` and per-language source files.
 
 ### Changed
+- r5-bootstrap: condensed `SKILL.md` and the references (each fact now lives in one file), batched all questions into one message, and made migrate ask before overwriting `.gitignore`. The release PR is exempt from `pr-title`, since Knope titles it `chore: prepare release`. The migrate flow now handles `core.hooksPath`, husky 9, Keep-a-Changelog headings, old tag formats, a missing lockfile and a stale required check.
 - r5-bootstrap: commit messages and PR titles must have a scope (`feat(api): x`). `feat: x` is rejected by the hook and the `pr-title` check.
 
 ### Added

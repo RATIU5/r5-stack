@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       prerelease:
-        description: Pre-release label, empty for a stable release
+        description: Pre-release label, none for a stable release
         type: choice
         options: [none, alpha, beta, rc]
         default: none
@@ -38,7 +38,7 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
       - uses: jdx/mise-action@SHA
       - id: pending
-        run: if find .changeset -name '*.md' ! -name README.md 2> /dev/null | grep -q .; then echo found=true >> "$GITHUB_OUTPUT"; fi
+        run: if find .changeset -name '*.md' 2> /dev/null | grep -q .; then echo found=true >> "$GITHUB_OUTPUT"; fi
       - if: steps.pending.outputs.found == 'true'
         run: mise run release:prepare -- ${PRERELEASE:+--prerelease-label "$PRERELEASE"}
         env:

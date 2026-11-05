@@ -19,7 +19,7 @@ env:
 
 jobs:
   pr-title:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.head_ref != 'release'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -39,6 +39,7 @@ jobs:
       HEAD_REF: ${{ github.head_ref }}
       BASE: ${{ github.base_ref }}
       AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+      SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@SHA
         with:

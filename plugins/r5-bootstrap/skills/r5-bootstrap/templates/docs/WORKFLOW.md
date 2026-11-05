@@ -44,7 +44,7 @@ app: minor
 ## Checks
 | Check | Enforces | Run locally |
 |---|---|---|
-| `pr-title` | PR title is a Conventional Commit | `mise run lint:title -- "feat(api): x"` |
+| `pr-title` | PR title is a Conventional Commit (the release PR is exempt) | `mise run lint:title -- "feat(api): x"` |
 | `changeset` | PR adds a changeset (bot, app and release PRs are exempt) | `mise run lint:changeset -- BRANCH` |
 | `check` | lint and tests pass | `mise run lint`, `mise run test` |
 | commit-msg hook | each local commit message | runs on `git commit` |

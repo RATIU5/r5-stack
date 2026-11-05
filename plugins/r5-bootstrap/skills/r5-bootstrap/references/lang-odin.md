@@ -1,6 +1,6 @@
 # Odin
 
-Installed by mise: `mise use --pin odin ols` (`ols` provides `odinfmt`). The archive is one folder (`odin`, `base/`, `core/`, `vendor/`); never move only the binary. Linking needs a system clang on the runner: add a `clang --version` step before `mise run build` in `ci.yml` and `release.yml`.
+Installed by mise: `mise use --pin odin ols` (`ols` provides `odinfmt`). The archive is one folder (`odin`, `base/`, `core/`, `vendor/`); never move only the binary. Linking needs a system clang on the runner: add a `clang --version` step before the first step that links: `mise run test` in `ci.yml` and `mise run build` in `release.yml`.
 
 ## Version
 - One `VERSION` file per component, plain `x.y.z`. Create it with `1.0.0` when absent. Knope reads it with `{ path = "VERSION", regex = '(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?)' }`.

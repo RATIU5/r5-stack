@@ -3,7 +3,7 @@
 Write only what the audit marked `missing`. Replace `NAME`, `OWNER`, `REPO`. No comments in generated files.
 
 ## README
-A very small generic one. Fill in one sentence only when the project says what it is, else leave the line out.
+Small and generic. One sentence on what it is only when the project says so; else omit the line.
 ```
 # NAME
 
@@ -18,16 +18,13 @@ mise run test
 
 LICENSE_NAME
 ```
-Drop the License section when there is no LICENSE. Drop test when no `test` task exists.
+Drop License when there is no LICENSE, and `mise run test` when no `test` task exists.
 
 ## LICENSE
-Only when the user names one. Fetch the text with `gh api licenses/<spdx-id-lowercase> --jq .body`, replace the year and holder with the current year and `git config user.name`. Never pick one silently.
+Only when the user names one: `gh api licenses/<spdx-id-lowercase> --jq .body`, with the current year and `git config user.name`.
 
 ## CODEOWNERS
-`.github/CODEOWNERS`, last match wins.
-- Solo: `* @OWNER`.
-- Team: `* @org/team`, and `/.github/ @org/team`, `/mise.toml @org/team` when a narrower group should own them.
-It only requests review until a ruleset requires code owner review.
+`.github/CODEOWNERS`, last match wins. Solo: `* @OWNER`. Team: `* @org/team`, plus narrower lines (`/.github/`, `/scripts/`, `/mise.toml`) when a smaller group owns them. It only requests review until a ruleset requires code owner review.
 
 ## PR template
 `.github/pull_request_template.md`:
@@ -39,10 +36,10 @@ It only requests review until a ruleset requires code owner review.
 - [ ] Changeset added
 - [ ] Tests pass
 ```
-Drop the title and changeset lines when the repo has no `knope.toml`.
+Drop the title and changeset lines without `knope.toml`.
 
 ## SECURITY.md
-Only for a public repo, and only if the user wants it. Point to GitHub private vulnerability reporting: `Report vulnerabilities at https://github.com/OWNER/REPO/security/advisories/new. Do not open a public issue.` Add the supported versions line only when the project has releases.
+Only for a public repo, when the user wants it: `Report vulnerabilities at https://github.com/OWNER/REPO/security/advisories/new. Do not open a public issue.` Add a supported-versions line only when releases exist.
 
 ## .editorconfig
 ```
@@ -56,10 +53,10 @@ trim_trailing_whitespace = true
 indent_style = INDENT
 indent_size = SIZE
 ```
-Node: `space`, `2`. Odin: `tab`, drop `indent_size`. Other languages: take the style from existing files, else drop both indent lines. Match the formatter's config when one exists.
+Node: `space`, `2`. Odin: `tab`, no `indent_size`. Otherwise copy the style of existing files or drop both indent lines. Match a formatter config when present.
 
 ## Renovate
-Only when the user says yes. `renovate.json`:
+Only on a yes. `renovate.json`:
 ```
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -67,7 +64,7 @@ Only when the user says yes. `renovate.json`:
   "semanticCommits": "enabled"
 }
 ```
-`semanticCommits` gives `chore(deps): ...` titles, which pass `pr-title`. The `changeset` check skips PRs created by bots and apps, so Renovate PRs need no changeset. The user installs the Renovate GitHub app (hand-off).
+`semanticCommits` gives `chore(deps): ...` titles that pass `pr-title`. The `changeset` check skips bot PRs. Dependabot needs `commit-message.prefix: "chore(deps)"` in its config for the same. The user installs the Renovate GitHub app.
 
 ## .gitignore
-Always the allowlist form. No `.gitignore`: copy `templates/gitignore` and add the allowlist lines from the language reference and the project's source folders. An existing `.gitignore` is converted as in `references/migrate.md`.
+Always the allowlist form: copy `templates/gitignore`, add the language lines and the project's source folders. An existing file is converted as in `references/migrate.md`.
