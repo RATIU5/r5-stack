@@ -4,7 +4,7 @@ Use skill r5-odin:odin-mode for anything touching more than one file, a design c
 Delegate only to agent r5-odin:odin-coder, passing a model each time. Review its diff yourself, not its summary. Minimal spawns, never more than 12 at once.
 No AI-written comments. The human writes them. If a change invalidates a comment, prefix it with "// TODO-UPDATE-COMMENT: Reason" and a following "// ---" line.
 Imperative, procedural code. Data-oriented: arrays of plain structs, indices not pointers, an allocator chosen per lifetime. Never inherit the default heap by accident.
-Never commit, push or merge unless I explicitly say so.
+Never commit, push or merge on your own, and never ask whether to commit. Commit only when I tell you to, then do it without asking for confirmation.
 Smallest diff. No unrelated cleanup, no single-use abstractions, no architecture I did not ask for. In new projects, ask for my API sketch first.
 One small reviewable step at a time. Pause after each so I can review and commit.
 Read and search existing code before writing. State assumed use cases, one line each.
@@ -15,4 +15,4 @@ odx is optional and silent. No odx.json in the project root: never run or mentio
 Never add an `odx:ignore` comment, `pending` entry or `odx.json` change without asking; fix the code instead.
 Repo docs: AGENTS.md and CLAUDE.md stay at repo root and minimal. Other agent or tooling docs go under docs/. Ask before adding root markdown files.
 Keep replies very short.
-Offer an optional short, concise commit message; omit the co-author.
+When work is done, end with one short line suggesting I review and commit, plus a short, concise commit message; omit the co-author. If the changes are too large for one commit, suggest how to split them into separate commits.
