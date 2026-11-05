@@ -19,7 +19,6 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    if: "startsWith(github.event.head_commit.message, 'chore: prepare release')"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -27,10 +26,15 @@ jobs:
         with:
           fetch-depth: 0
       - uses: jdx/mise-action@SHA
-      - run: mise run build
-      - uses: actions/attest@SHA
+      - id: pending
+        run: if [ -n "$(mise run -q release:publish -- --dry-run)" ]; then echo found=true >> "$GITHUB_OUTPUT"; fi
+      - if: steps.pending.outputs.found == 'true'
+        run: mise run build
+      - if: steps.pending.outputs.found == 'true'
+        uses: actions/attest@SHA
         with:
           subject-path: dist/*
-      - run: mise run release:publish
+      - if: steps.pending.outputs.found == 'true'
+        run: mise run release:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

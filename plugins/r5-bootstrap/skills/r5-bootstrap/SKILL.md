@@ -19,7 +19,7 @@ Read the repo, then print one table: each part below as `present`, `partial`, `d
 | Renovate | `renovate.json`; add only when the user says yes. An existing Dependabot config counts as `different` |
 | Workflow doc | `docs/WORKFLOW.md`, and `AGENTS.md` or `CLAUDE.md` points to it |
 | Commit and PR checks | `cog.toml`, `scripts/lint-commit.sh`, `scripts/check-changeset.sh`, a working commit-msg hook, `pr-title` and `changeset` jobs |
-| Release | `knope.toml`, `release.yml`, `prepare-release.yml` |
+| Release | `knope.toml`, `release.yml`, `prepare-release.yml`; changelog-only: `knope.toml` with a `changelog` workflow |
 | Housekeeping | `label-pr.yml`, `stale.yml` |
 
 ## Prerequisites
@@ -34,26 +34,26 @@ Read the manifests, `mise.toml`, `knope.toml`, `cog.toml`, `.changeset/`, `.gith
 - Existing tags, `CHANGELOG.md`, hooks, commitlint or release tooling: `references/migrate.md`. Never run two systems for one job.
 - A `scripts/deploy.sh` that already exists is not a deploy target.
 
-Ask in one message, only what you cannot detect, each with its default: new-project language, package manager and kind; `OWNER/REPO` or `gh repo create` when there is no `origin`; visibility (private); components when unclear; solo or team and `@org/team` (solo); license for a public or new project (none); environments (`production`); staging branch (no); deploy target (unknown: skip `deploy` and `promote.yml`); Renovate (no); and the questions `migrate.md` calls for. A new project's API sketch comes last (`rules/core.md`).
+Ask in one message, only what you cannot detect, each with its default: new-project language, package manager and kind; `OWNER/REPO` or `gh repo create` when there is no `origin`; visibility (private); release mode or changelog only, no releases (release); link changelog entries to PRs or commits (yes); starting version when the repo has date-based or no versions; components when unclear; solo or team and `@org/team` (solo); license for a public or new project (none); environments (`production`); staging branch (no); deploy target (unknown: skip `deploy` and `promote.yml`); Renovate (no); and the questions `migrate.md` calls for. A new project's API sketch comes last (`rules/core.md`).
 
 ## Tools
 For an unfamiliar tool or flag, read `<tool> --help` and `<tool> <subcommand> --help` first (`mise x --`, `pnpm dlx` or `npx` if not installed). Never write a config from memory. Create and change files with the tool (`mise use --pin`, `mise tasks add`) and review the result; copy a template only when no command makes the file. `knope --generate` and `knope document-change` are interactive: do not run them, or instruct the user to run them.
 
 ## Set up
 1. `mise use --pin cocogitto github:knope-dev/knope <language tools>`, then `mise lock`. An existing `mise.lock` keeps its pins: `git diff mise.lock` shows only new tools.
-2. `mise tasks add` (`references/mise.md`): `dev`, `build`, `lint`, `test`, `fmt` where the project has them, plus `lint:title`, `lint:changeset`, `label:pr`, `release:prepare`, `release:publish`, and `deploy` when the target is known. Nothing else. `dev:<name>` only for packages that exist.
-3. Copy `templates/knope.toml`; set components and `versioned_files`. `knope --validate` fails before the first commit, so run it after.
+2. `mise tasks add` (`references/mise.md`): `dev`, `build`, `lint`, `test`, `fmt` where the project has them, plus `lint:title`, `lint:changeset`, `label:pr`, `changelog`, `release:prepare`, `release:publish` (not the `release:*` pair in changelog-only mode), and `deploy` when the target is known. Nothing else. `dev:<name>` only for packages that exist.
+3. Copy `templates/knope.toml`; set components and `versioned_files`. No links: delete `[release_notes]`. Changelog-only: `references/knope.md`. Seed a starting version with `--override-version`. No `fmt` task: delete the `mise run fmt` steps. `knope --validate` fails before the first commit, so run it after.
 4. Copy `templates/cog.toml` and `templates/scripts/*` to `scripts/`, executable. Install the hook: `mise x -- cog install-hook commit-msg` (`--overwrite` replaces an old one), or inside an existing manager (`references/migrate.md`). Prove it: a bad message must fail to commit.
-5. Copy `templates/workflows/*` to `.github/workflows/`. Replace tokens, pin actions (`references/github.md`), delete steps for tasks that do not exist (a `check` job with no steps goes). No `build` task, nothing to ship, or a private repo without Enterprise Cloud: drop the build, attest and `assets` (`references/pipeline.md`). `staging.yml` only with a staging branch (also add `staging` to the `push` branches in `ci.yml`), `promote.yml` only with a deploy target. Map each deploy secret into the `deploy` step with `env: NAME: ${{ secrets.NAME }}`.
+5. Copy `templates/workflows/*` to `.github/workflows/`. Replace tokens, pin actions (`references/github.md`), delete steps for tasks that do not exist (a `check` job with no steps goes). No `build` task, nothing to ship, or a private repo without Enterprise Cloud: drop the build, attest and `assets` (`references/pipeline.md`). Changelog-only: skip `release.yml`, `prepare-release.yml` and `promote.yml`. `staging.yml` only with a staging branch (also add `staging` to the `push` branches in `ci.yml`), `promote.yml` only with a deploy target. Map each deploy secret into the `deploy` step with `env: NAME: ${{ secrets.NAME }}`.
 6. `.gitignore` and the repo files in `references/repo.md`. Add the language's allowlist lines (`references/lang-*.md`). Check: `git ls-files | git check-ignore --no-index --stdin` prints nothing, and `git add -A -n` lists new source and config files.
-7. Copy `templates/docs/WORKFLOW.md` to `docs/`, replace `BRANCH`, drop whole sections and Checks rows for skipped parts (release, labels, hook). Add `Commits, PRs and releases: follow docs/WORKFLOW.md.` to `AGENTS.md` or `CLAUDE.md`; create a minimal `AGENTS.md` with only that line if neither exists.
+7. Copy `templates/docs/WORKFLOW.md` to `docs/`, replace `BRANCH`, drop whole sections and Checks rows for skipped parts (release, labels, hook); changelog-only replaces Release with the Changelog section in `references/knope.md`. Add `Commits, PRs and releases: follow docs/WORKFLOW.md.` to `AGENTS.md` or `CLAUDE.md`; create a minimal `AGENTS.md` with only that line if neither exists.
 8. Check `mise tasks`, then `mise run lint:title -- "feat(app): x"` passes and `-- "feat: x"` fails.
 
 ## Rules
 - Every repeatable project-wide command is a mise task. Workflows call `mise run <task>` and hold no logic. A script over 3 lines or 3 `&` goes in `scripts/`.
 - Pin exact tool versions, commit `mise.lock`, install in CI with `MISE_LOCKED=1`.
 - One Knope `[packages.<name>]` per component, tags `<name>/vX.Y.Z`, never `[package]`.
-- Every PR adds a changeset by hand (`references/knope.md`); the `changeset` check enforces it.
+- Every PR adds a changeset by hand or records the changelog locally (`references/knope.md`); the `changeset` check enforces it.
 - Build once. Promotion and rollback deploy the attested release artifact.
 - No comments in generated or templated files.
 - Never run a release, deploy or promotion. Never push, open or merge a PR, or enable auto-merge: only the user merges. Never write a secret to a file.

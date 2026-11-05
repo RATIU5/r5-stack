@@ -57,7 +57,7 @@ for job in re.findall(r"^\| `([\w-]+)` \|", doc, re.M):
 for job in re.findall(r"^  ([\w-]+):\n    (?:if|runs-on)", ci, re.M):
     expect("ci.yml: job %s is in WORKFLOW.md" % job, "`%s`" % job in doc)
 release_msg = "chore: prepare release"
-for name in ("templates/knope.toml", "templates/workflows/release.yml", "templates/workflows/prepare-release.yml"):
+for name in ("templates/knope.toml", "templates/workflows/prepare-release.yml"):
     expect(name + ": release commit message", release_msg in read(*name.split("/")))
 expect("SKILL.md: every template and script it names exists",
        all(os.path.exists(os.path.join(SKILL, p)) for p in
