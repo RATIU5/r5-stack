@@ -25,3 +25,6 @@ One `[packages.<name>]` per workspace package that ships, with that package's `p
 
 ## Deploy secrets
 Name them for the user's hand-off: Workers use `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+
+## oxc toolchain (JavaScript and TypeScript)
+Defaults for Node projects: `oxlint` for `lint`, `oxfmt` for `fmt`. oxc does not type-check, so a TypeScript project also gets `tsc --noEmit` in `lint`. Add them as dev dependencies with the package manager, never globally. Run `<pm> exec oxlint --help` and `<pm> exec oxfmt --help` (or `pnpm dlx`, `npx`) before writing scripts, and use the flags they print. A project already on another linter or formatter keeps it. Add a `test` task only when the project has a test runner.

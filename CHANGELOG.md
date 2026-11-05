@@ -4,9 +4,17 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
-## [r5-pipeline 0.2.0] - 2026-11-04
+## [r5-bootstrap 0.2.0] - 2026-11-04
+
+### Changed
+- BREAKING: plugin and skill `r5-pipeline` renamed to `r5-bootstrap`, and the tests moved to `tests/r5-bootstrap`. Reinstall with `/plugin install r5-bootstrap@r5-stack`. The version stays 0.2.0.
+- The skill audits the repo first, prints each part as present, missing or skipped, and sets up only what is missing. It asks for language, package manager and project kind only when none exists and the prompt names none, and uses defaults for the rest.
+- The skill researches a tool's `--help` before writing its config.
+- The hand-off follows a fixed template in `references/handoff.md`.
 
 ### Added
+- `references/repo.md`: small README, LICENSE on request, PR template and `SECURITY.md` for public repos.
+- Node projects default to the oxc toolchain (`oxlint`, `oxfmt`, plus `tsc --noEmit` for TypeScript). Odin projects get `odinfmt` and optional `odx`.
 - The skill asks whether the repo is solo or team and writes `.github/CODEOWNERS`. Solo repos own everything; team repos can narrow ownership of `.github/` and `mise.toml`.
 
 ### Changed
@@ -77,7 +85,7 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - Hook tests and an `odin test` suite for the allocator reference.
 
 [Unreleased]: https://github.com/RATIU5/r5-stack/commits/main
-[r5-pipeline 0.2.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
+[r5-bootstrap 0.2.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-bootstrap
 [r5-odin 0.1.4]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-odin
 [r5-pipeline 0.1.1]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline
 [r5-pipeline 0.1.0]: https://github.com/RATIU5/r5-stack/tree/main/plugins/r5-pipeline

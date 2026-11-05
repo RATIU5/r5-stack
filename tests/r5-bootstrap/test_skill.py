@@ -7,8 +7,8 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PLUGIN = os.path.join(ROOT, "plugins", "r5-pipeline")
-SKILL = os.path.join(PLUGIN, "skills", "r5-pipeline")
+PLUGIN = os.path.join(ROOT, "plugins", "r5-bootstrap")
+SKILL = os.path.join(PLUGIN, "skills", "r5-bootstrap")
 failures = []
 
 
@@ -53,7 +53,7 @@ with tempfile.TemporaryDirectory() as empty, tempfile.TemporaryDirectory() as ma
     open(os.path.join(marked, "mise.toml"), "w").close()
     expect("hook: silent without mise.toml or knope.toml", run_hook(empty) == "")
     out = run_hook(marked)
-    expect("hook: injects rules with mise.toml", "r5-pipeline core rules" in out)
+    expect("hook: injects rules with mise.toml", "r5-bootstrap core rules" in out)
     nested = os.path.join(marked, "repo")
     os.makedirs(os.path.join(nested, ".git"))
     expect("hook: marker above the git root is ignored", run_hook(nested) == "")

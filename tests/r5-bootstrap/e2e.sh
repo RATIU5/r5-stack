@@ -1,6 +1,6 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-skill=$here/../../plugins/r5-pipeline/skills/r5-pipeline
+skill=$here/../../plugins/r5-bootstrap/skills/r5-bootstrap
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 cd "$work"

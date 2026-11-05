@@ -10,6 +10,8 @@ Installed by mise: `mise use --pin odin`. The archive is one folder (`odin`, `ba
 - `build`: `odin build <pkg> -out:dist/<name> -vet -strict-style`.
 - `test`: `odin test <pkg> -vet -strict-style`.
 - `lint`: `odin check <pkg> -vet -vet-cast -strict-style`.
+- `fmt`: `odinfmt -w <pkg>` (from ols; confirm with `odinfmt --help`). `fmt:check` is the same without `-w` when the installed version supports it.
+- `odx check` only when the project root has `odx.json` and `odx --version` works. Otherwise never run or mention odx.
 - Reuse the project's own flags when it already has them.
 
 ## Dependencies

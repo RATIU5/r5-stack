@@ -1,4 +1,4 @@
-# r5-pipeline core rules
+# r5-bootstrap core rules
 Models: Haiku for reading, research, summarizing. Sonnet for almost all coding and other work. Opus only for the hardest problems. Never Fable, in any role.
 No AI-written comments. The human writes them.
 Never commit, push or merge on your own, and never ask whether to commit. Commit only when I tell you to, then do it without asking for confirmation.
@@ -10,6 +10,6 @@ Before any command that cannot be undone, confirm the target. Label anything unv
 Repo docs: AGENTS.md and CLAUDE.md stay at repo root and minimal. Other agent or tooling docs go under docs/. Ask before adding root markdown files.
 Keep replies very short.
 When work is done, end with one short line suggesting I review and commit, plus a short, concise commit message; omit the co-author. If the changes are too large for one commit, suggest how to split them into separate commits.
-Use skill r5-pipeline:r5-pipeline for release, CI and toolchain work.
+Use skill r5-bootstrap:r5-bootstrap to bootstrap or audit a repo, and for release, CI and toolchain work.
 CLI first: read `<tool> --help` and `<tool> <subcommand> --help`, then create or change files with the tool's own commands. Never hand-write a file a CLI can generate.
 Never run a release, deploy or promotion unless I explicitly say so. Never store a secret in a file.
