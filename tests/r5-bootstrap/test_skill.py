@@ -29,7 +29,7 @@ for path in glob.glob(os.path.join(SKILL, "templates", "**", "*"), recursive=Tru
         continue
     rel = os.path.relpath(path, SKILL)
     lines = open(path, encoding="utf-8").read().splitlines()
-    expect(rel + ": no comments", not any(l.lstrip().startswith("#") for l in lines))
+    expect(rel + ": no comments", not any(l.lstrip().startswith("#") and not l.startswith("#!") for l in lines))
     expect(rel + ": at most 80 lines", len(lines) <= 80)
 
 for wf in glob.glob(os.path.join(SKILL, "templates", "workflows", "*.yml")):
@@ -51,11 +51,9 @@ def run_hook(cwd):
 
 with tempfile.TemporaryDirectory() as empty, tempfile.TemporaryDirectory() as marked:
     open(os.path.join(marked, "mise.toml"), "w").close()
-    expect("hook: silent without mise.toml or knope.toml", run_hook(empty) == "")
-    out = run_hook(marked)
-    expect("hook: injects rules with mise.toml", "r5-bootstrap core rules" in out)
-    nested = os.path.join(marked, "repo")
-    os.makedirs(os.path.join(nested, ".git"))
-    expect("hook: marker above the git root is ignored", run_hook(nested) == "")
+    expect("hook: injects rules in an empty directory", "r5-bootstrap core rules" in run_hook(empty))
+    expect("hook: injects rules with mise.toml", "r5-bootstrap core rules" in run_hook(marked))
+    expect("hook: output is valid additionalContext JSON",
+           json.loads(run_hook(empty))["hookSpecificOutput"]["hookEventName"] == "SessionStart")
 
 sys.exit(1 if failures else 0)

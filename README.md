@@ -35,8 +35,17 @@ claude plugin install r5-bootstrap@r5-stack
 
 ```
 .claude-plugin/marketplace.json
-plugins/r5-odin/           the plugin
+plugins/r5-odin/           Odin plugin
+plugins/r5-bootstrap/      repo bootstrap plugin
 tests/r5-odin/             hook tests and the allocator test suite
+tests/r5-bootstrap/        skill checks and an end-to-end tool test
+```
+
+r5-bootstrap tests (`e2e.sh` needs mise and network):
+
+```bash
+python3 -I tests/r5-bootstrap/test_skill.py
+tests/r5-bootstrap/e2e.sh
 ```
 
 Run the tests from the repo root:

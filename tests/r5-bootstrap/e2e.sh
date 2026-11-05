@@ -14,6 +14,7 @@ mise use --pin cocogitto github:knope-dev/knope > /dev/null
 mise lock > /dev/null
 sed 's/OWNER/o/; s/REPO/r/; s/BRANCH/trunk/' "$skill/templates/knope.toml" > knope.toml
 cp "$skill/templates/cog.toml" cog.toml
+mkdir scripts && cp "$skill/templates/scripts/lint-commit.sh" scripts/
 git add -A && git commit -qm "feat: init"
 mise x -- knope --validate || fail "knope.toml validates"
 echo "ok   knope.toml validates"
@@ -24,9 +25,15 @@ if git commit -qm "bad message" 2> /dev/null; then fail "hook rejects a bad mess
 git commit -qm "feat: good message" || fail "hook accepts a good message"
 echo "ok   commit-msg hook"
 
-mise tasks add lint:commits --description "Check commit messages" -- cog check --ignore-merge-commits > /dev/null
-mise run lint:commits -- HEAD~1..HEAD || fail "lint:commits runs"
-echo "ok   lint:commits"
+git commit -q --allow-empty -m 'Revert "feat: good message"' || fail "hook accepts a revert"
+git commit -q --allow-empty -m "fixup! feat: good message" || fail "hook accepts a fixup"
+echo "ok   revert and fixup commits"
+
+mise tasks add lint:title --description "Check a commit or PR title" -- sh scripts/lint-commit.sh > /dev/null
+mise run lint:title -- "feat: x" > /dev/null || fail "lint:title accepts a conventional title"
+mise run lint:title -- "chore(deps): bump y" > /dev/null || fail "lint:title accepts a scoped title"
+if mise run lint:title -- "bad title" > /dev/null 2>&1; then fail "lint:title rejects a bad title"; fi
+echo "ok   lint:title"
 
 cat > knope.toml <<'KNOPE'
 [packages.app]
