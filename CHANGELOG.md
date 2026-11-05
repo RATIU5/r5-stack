@@ -4,6 +4,8 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-bootstrap 0.3.0] - 2026-11-05
+
 ### Changed
 - r5-bootstrap: the SessionStart hook injects the core rules in every repo, including new ones with no `mise.toml`.
 - r5-bootstrap: CI checks the PR title (`pr-title`) instead of every commit. The commit-msg hook and title check skip Revert, merge, fixup and squash commits through `scripts/lint-commit.sh`.
