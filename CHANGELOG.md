@@ -4,6 +4,8 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-bootstrap 0.4.0] - 2026-11-05
+
 ### Added
 - r5-bootstrap: record the changelog locally in the feature PR with `mise run changelog`; `check-changeset.sh` passes a PR that changes a `CHANGELOG.md`.
 - r5-bootstrap: changelog-only mode, opt-in `[release_notes]` links to PRs or commits, and first-version seeding with `--override-version`.
