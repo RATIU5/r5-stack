@@ -2,6 +2,7 @@ name: ci
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [BRANCH]
 
@@ -16,19 +17,18 @@ env:
   MISE_LOCKED: "1"
 
 jobs:
-  commits:
+  pr-title:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      BASE: ${{ github.base_ref }}
+      TITLE: ${{ github.event.pull_request.title }}
     steps:
       - uses: actions/checkout@SHA
         with:
-          fetch-depth: 0
           persist-credentials: false
       - uses: jdx/mise-action@SHA
-      - run: mise run lint:commits -- "origin/$BASE..HEAD"
+      - run: mise run lint:title -- "$TITLE"
 
   check:
     runs-on: ubuntu-latest

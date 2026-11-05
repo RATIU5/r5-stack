@@ -5,8 +5,8 @@ Print these sections in this order with real names filled in. Omit a section onl
 ## 1. Secrets
 | Name | Scope | Create it |
 |---|---|---|
-| `RELEASE_TOKEN` | repository | Fine-grained personal access token, Contents and Pull requests write. GitHub App tokens expire after an hour and do not work. |
-| deploy secrets | per environment | Names read from `scripts/deploy.sh` or the `deploy` task. |
+| `RELEASE_TOKEN` | repository | Fine-grained personal access token, Contents and Pull requests write. Alternative: a GitHub App installation token minted per run with `actions/create-github-app-token`; the app then authors the release PR, so a human can approve it. |
+| deploy secrets | per environment | Names read from `scripts/deploy.sh` or the `deploy` task. Each is mapped in the `deploy` step's `env:`. |
 
 ## 2. Variables
 Name, scope, value. Same source as secrets.
@@ -19,14 +19,16 @@ One row per environment from the answers.
 
 ## 4. Ruleset on BRANCH (and staging if used)
 - Require a pull request. Approvals: solo 0, team 1. Team: require code owner review. Solo: leave it off, since an author cannot approve their own PR.
-- Required status checks: the job names in `ci.yml` (commits, lint, test, build where those jobs exist).
-- Block force pushes and deletion. Require linear history.
-- The `RELEASE_TOKEN` owner cannot approve the release PR, so a team needs a second reviewer.
+- Required status checks: `pr-title` and `check`, plus `build` if `ci.yml` has that job.
+- Block force pushes and deletion. Require linear history only without a staging branch; with one, the `staging` into `BRANCH` merge needs a merge commit.
+- A PAT owner cannot approve the release PR, so a team needs a second reviewer or a GitHub App token.
 
 ## 5. Repository settings
-- Merge: squash only. Automatically delete head branches.
+- Merge: squash. With a staging branch also allow merge commits. Automatically delete head branches.
+- Squash commit message: pull request title. `pr-title` then validates what lands on `BRANCH`.
 - Public repo: enable secret scanning, push protection and private vulnerability reporting.
 - Actions: workflow permissions read-only by default.
+- Renovate added: install the Renovate GitHub app on the repo.
 
 ## 6. Per clone
 `mise x -- cog install-hook commit-msg`.

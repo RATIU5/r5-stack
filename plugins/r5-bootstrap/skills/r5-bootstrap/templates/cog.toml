@@ -1,2 +1,2 @@
 [git_hooks.commit-msg]
-script = "mise x -- cog verify --file $1"
+script = "mise x -- sh scripts/lint-commit.sh --file $1"

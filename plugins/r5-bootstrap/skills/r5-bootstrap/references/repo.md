@@ -43,5 +43,30 @@ Drop the changeset line when the repo has no `knope.toml`.
 ## SECURITY.md
 Only for a public repo, and only if the user wants it. Point to GitHub private vulnerability reporting: `Report vulnerabilities at https://github.com/OWNER/REPO/security/advisories/new. Do not open a public issue.` Add the supported versions line only when the project has releases.
 
+## .editorconfig
+```
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = INDENT
+indent_size = SIZE
+```
+Node: `space`, `2`. Odin: `tab`, drop `indent_size`. Other languages: take the style from existing files, else drop both indent lines. Match the formatter's config when one exists.
+
+## Renovate
+Only when the user says yes. `renovate.json`:
+```
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "semanticCommits": "enabled"
+}
+```
+`semanticCommits` gives `chore(deps): ...` titles, which pass `pr-title`. The user installs the Renovate GitHub app (hand-off).
+
 ## .gitignore
 No `.gitignore`: copy `templates/gitignore` and add the project's source paths.

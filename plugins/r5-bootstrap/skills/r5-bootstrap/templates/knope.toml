@@ -1,5 +1,5 @@
 [packages.app]
-assets = "dist/*"
+assets = "dist/app*"
 versioned_files = ["package.json"]
 changelog = "CHANGELOG.md"
 

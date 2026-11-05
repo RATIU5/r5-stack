@@ -1,6 +1,6 @@
 ---
 name: r5-bootstrap
-description: Bootstrap a GitHub repository for any language or audit one for gaps. Sets up only what is missing (README, license, CODEOWNERS, PR template, mise toolchain, Knope changesets, cocogitto commit checks, GitHub Actions release, staging and promotion), then hands off GitHub settings and secrets.
+description: Bootstrap a GitHub repository for any language or audit one for gaps. Sets up only what is missing (README, license, CODEOWNERS, PR template, editorconfig, mise toolchain, Knope changesets, cocogitto commit and PR title checks, GitHub Actions release, staging and promotion), then hands off GitHub settings and secrets.
 ---
 
 # r5-bootstrap
@@ -16,8 +16,10 @@ Before asking anything, read the repo and print one table: each part below as `p
 | LICENSE | `LICENSE*` exists; skip unless the user names a license |
 | CODEOWNERS | `.github/CODEOWNERS` exists |
 | PR template | `.github/pull_request_template.md` exists |
+| `.editorconfig` | file exists |
 | `SECURITY.md` | exists; offer only when the repo is public |
-| Commit checks | `cog.toml` and the commit-msg hook |
+| Renovate | `renovate.json` or Dependabot config exists; offer, add only when the user says yes |
+| Commit checks | `cog.toml`, `scripts/lint-commit.sh` and the commit-msg hook |
 | Release | `knope.toml`, `.github/workflows/` |
 
 ## Project type
@@ -30,12 +32,15 @@ An existing project: detect language, package manager and tools from its files a
 For any stack the skill has no reference for, or any tool whose flags you are unsure of, run `<tool> --help` and `<tool> <subcommand> --help` first (`pnpm dlx`, `npx` or `mise x --` when it is not installed), then use the real commands. Never write a config from memory.
 
 ## Check the machine
-Run `mise --version`, `git --version` and `gh auth status`. If one fails, stop, name it, ask the user to install it (mise: https://mise.jdx.dev/getting-started.html) or run `gh auth login`, and wait. Every other tool comes from the project's `mise.toml`: run it with `mise x -- <tool>` or `mise run <task>`. Run from the repository root. If mise reports an untrusted config, run `mise trust`.
+Run `mise --version`, `git --version` and `gh auth status`. If one fails, stop, name it, ask the user to install it (mise: https://mise.jdx.dev/getting-started.html) or run `gh auth login`, and wait. A remote that is not on github.com: say this skill targets GitHub Actions and ask whether to continue with repo files only. Every other tool comes from the project's `mise.toml`: run it with `mise x -- <tool>` or `mise run <task>`. Run from the repository root. If mise reports an untrusted config, run `mise trust`.
 
 ## Detect
 Read first: `mise.toml`, `knope.toml`, `cog.toml`, `.changeset/`, `.github/`, `.gitignore`.
 - Default branch: `git ls-remote --symref origin HEAD`, else `gh repo view --json defaultBranchRef`, else the one `git init` made. It replaces `BRANCH` in templates. Never assume `main`.
 - Owner, repo and visibility: `git remote get-url origin`, `gh repo view --json visibility`. They replace `OWNER` and `REPO`. The component name replaces `app`.
+- No `origin` remote: ask for `OWNER/REPO`, or whether to create it with `gh repo create`. Never create it unasked.
+- Existing release tags or `CHANGELOG.md`: read them and start each component at its latest tag version. Knope tags are `<name>/vX.Y.Z`, so ask before changing the old tag format.
+- Existing commit hooks (husky, lefthook, pre-commit) or commitlint: ask whether to replace them. Never run two.
 - Existing release tooling (release-please, semantic-release, the changesets CLI, a release workflow): ask whether to replace it. Never run two.
 - Language and package manager: pick `references/lang-*.md`. With no match, follow "Other languages" in `references/pipeline.md`.
 - Components: one per shippable unit (app, package, service). Ask when unclear.
@@ -54,12 +59,12 @@ Required checks and the commit convention (Conventional Commits) use the default
 ## Set up
 Only for parts the audit marked `missing`. Templates for repo files are in `references/repo.md`.
 1. `mise use --pin cocogitto github:knope-dev/knope <language tools>`, then `mise lock`.
-2. Add project-global tasks with `mise tasks add` (commands in `references/mise.md`): `build`, `lint`, `test`, `fmt` where the project has them, plus `lint:commits`, `release:prepare`, `release:publish`, and `deploy` when the target is known. Leave out anything else. Per-package tasks (`dev:<name>`) only for packages that exist now.
+2. Add project-global tasks with `mise tasks add` (commands in `references/mise.md`): `build`, `lint`, `test`, `fmt` where the project has them, plus `lint:title`, `release:prepare`, `release:publish`, and `deploy` when the target is known. Leave out anything else. Per-package tasks (`dev:<name>`) only for packages that exist now.
 3. Copy `templates/knope.toml`, set components and `versioned_files`, run `mise x -- knope --validate`.
-4. Copy `templates/cog.toml`. Run `mise x -- cog install-hook commit-msg` once. If it fails because hooks are already managed, tell the user and do not overwrite.
-5. Copy `templates/workflows/*` into `.github/workflows/`. Replace tokens, pin actions (`references/github.md`), and delete steps for tasks that do not exist. Add `staging.yml` (and `staging` to the `push` branches in `ci.yml`) only for a staging branch, `promote.yml` only with a deploy target. A component with nothing to ship loses the attest step and `assets` (see `references/pipeline.md`).
-6. `.gitignore`, README, LICENSE, CODEOWNERS, PR template, `SECURITY.md`: write the missing ones from `references/repo.md`. Run `git add -A -n` and confirm every source and config file is listed.
-7. Check: `mise tasks`, `mise x -- cog --version`, `mise x -- knope --validate`. Commit lint runs on real ranges once the user commits.
+4. Copy `templates/cog.toml` and `templates/scripts/lint-commit.sh` (to `scripts/`, executable). Run `mise x -- cog install-hook commit-msg` once. If it fails because hooks are already managed, tell the user and do not overwrite.
+5. Copy `templates/workflows/*` into `.github/workflows/`. Replace tokens, pin actions (`references/github.md`), and delete steps for tasks that do not exist. Add `staging.yml` (and `staging` to the `push` branches in `ci.yml`) only for a staging branch, `promote.yml` only with a deploy target. A component with nothing to ship, or a private repo without GitHub Enterprise Cloud, loses the attest step and `assets` (see `references/pipeline.md`). Add `env: NAME: ${{ secrets.NAME }}` to the `deploy` step for every deploy secret; environment secrets are not exported on their own.
+6. `.gitignore`, README, LICENSE, CODEOWNERS, PR template, `.editorconfig`, `SECURITY.md`, and `renovate.json` only if the user said yes: write the missing ones from `references/repo.md`. Run `git add -A -n` and confirm every source and config file is listed.
+7. Check: `mise tasks`, `mise x -- cog --version`, `mise x -- knope --validate`. Test the title check: `mise run lint:title -- "feat: x"` passes, `-- "bad"` fails.
 
 ## Rules
 - Every repeatable project-wide command is a mise task. Workflows call `mise run <task>` and hold no logic.
@@ -79,7 +84,7 @@ End with the template in `references/handoff.md`, filled with the real names, sa
 - `references/pipeline.md`: the flow, branches, environments, staging, pre-releases, monorepo, other languages.
 - `references/mise.md`, `references/knope.md`: tasks, lock, tool names; Knope config, changesets, release PR.
 - `references/github.md`: action pinning, environments, rulesets, attestation, promotion.
-- `references/repo.md`: README, LICENSE, CODEOWNERS, PR template, SECURITY.md.
+- `references/repo.md`: README, LICENSE, CODEOWNERS, PR template, .editorconfig, SECURITY.md, Renovate.
 - `references/handoff.md`: the hand-off template and defaults.
 - `references/lang-node.md`, `references/lang-odin.md`: language specifics.
-- `templates/`: `knope.toml`, `cog.toml`, `gitignore`, `workflows/`.
+- `templates/`: `knope.toml`, `cog.toml`, `gitignore`, `scripts/`, `workflows/`.

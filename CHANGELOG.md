@@ -4,6 +4,16 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+### Changed
+- r5-bootstrap: the SessionStart hook injects the core rules in every repo, including new ones with no `mise.toml`.
+- r5-bootstrap: CI checks the PR title (`pr-title`) instead of every commit. The commit-msg hook and title check skip Revert, merge, fixup and squash commits through `scripts/lint-commit.sh`.
+- r5-bootstrap: hand-off lists the real CI job names, allows merge commits when a staging branch exists, offers GitHub App tokens, and drops the commit message ruleset and tag restriction advice.
+- r5-bootstrap: `prepare-release.yml` skips when no changeset exists and passes the pre-release label through `env`. `assets` is per component. Deploy secrets are mapped into the deploy step.
+- r5-bootstrap: Odin setup pins `ols` for `odinfmt`. Knope notes now match tested behavior (pre-release keeps changesets, `$version` works with one package).
+
+### Added
+- r5-bootstrap: `.editorconfig`, opt-in Renovate config, and handling for a missing `origin`, existing tags, existing commit hooks and non-GitHub remotes.
+
 ## [r5-bootstrap 0.2.0] - 2026-11-04
 
 ### Changed

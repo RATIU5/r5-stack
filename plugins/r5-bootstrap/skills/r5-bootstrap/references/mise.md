@@ -9,11 +9,11 @@
 
 ## Pipeline tasks
 ```
-mise tasks add lint:commits --description "Check commit messages" -- cog check --ignore-merge-commits
+mise tasks add lint:title --description "Check a commit or PR title" -- sh scripts/lint-commit.sh
 mise tasks add release:prepare --description "Open or refresh the release pull request" -- knope prepare-release
 mise tasks add release:publish --description "Create tags and GitHub releases" -- knope release
 ```
-Check a pull request's commits with `mise run lint:commits -- origin/<base>..HEAD`. Task names with `:` are quoted in TOML. Do not add a task for work done once, such as installing the commit hook.
+Check a title with `mise run lint:title -- "feat: x"`. Task names with `:` are quoted in TOML. Do not add a task for work done once, such as installing the commit hook.
 
 ## Tasks
 - Only project-wide tasks live in `mise.toml`. Developers decide whether finer commands live in mise, scripts or the language's own manifest.
