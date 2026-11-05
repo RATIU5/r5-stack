@@ -6,7 +6,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 1. Branch from `BRANCH`. Open a PR. Never push to `BRANCH`.
 2. Write Conventional Commit messages: `type(scope): summary`.
 3. Title the PR the same way. The PR title becomes the squash commit on `BRANCH`.
-4. Every PR adds one changeset file.
+4. Every PR adds one changeset file or records the changelog.
 5. Merge the release PR to ship. Never tag or publish by hand.
 6. Only a person merges a PR. Agents never merge and never enable auto-merge.
 
@@ -26,7 +26,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 - Workflows on pull requests never get secrets. Do not add any.
 
 ## Changesets
-A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate) and the release PR do not. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
+A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate) do not. A PR that changes `CHANGELOG.md` also passes the check. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
 ```
 ---
 app: minor
@@ -40,21 +40,23 @@ app: minor
 - Below 1.0.0 a `minor` change bumps the patch number.
 - The title line is the changelog entry. Write it for a user, not a developer.
 - Keep only changeset files in `.changeset/`.
+- Record locally instead: commit the changeset, push, open the PR, then run `mise run changelog` and commit `CHANGELOG.md`, the version bump and the deleted changesets in the same PR.
+- Changelog entries link to the PR when recorded after the PR is open (needs `GITHUB_TOKEN`), to the commit that added the changeset otherwise, and have no link for an uncommitted changeset.
 
 ## Checks
 | Check | Enforces | Run locally |
 |---|---|---|
 | `pr-title` | PR title is a Conventional Commit (the release PR is exempt) | `mise run lint:title -- "feat(api): x"` |
-| `changeset` | PR adds a changeset (bot, app and release PRs are exempt) | `mise run lint:changeset -- BRANCH` |
+| `changeset` | PR adds a changeset or changes `CHANGELOG.md` (bot and app PRs are exempt) | `mise run lint:changeset -- BRANCH` |
 | `check` | lint and tests pass | `mise run lint`, `mise run test` |
 | commit-msg hook | each local commit message | runs on `git commit` |
 
 Required checks are set in the repository ruleset. A red check blocks the merge.
 
 ## Release
-1. Changes merge to `BRANCH`. A bot opens or updates one release PR with versions and the changelog.
+1. Changes merge to `BRANCH`. A bot opens or updates one release PR with versions and the changelog for the pending changesets.
 2. Review the version bump and the changelog. Merge the release PR.
-3. CI builds, attests, tags `<component>/vX.Y.Z` and creates the GitHub release.
+3. CI builds, attests, tags `<component>/vX.Y.Z` and creates the GitHub release for every version with no tag. A version recorded locally in a feature PR is released the same way when it merges.
 4. Pre-release: run the `prepare-release` workflow with `alpha`, `beta` or `rc`. Merge or close an open pre-release PR before merging other PRs.
 5. Fix a bad release by merging a new fix PR and releasing forward. There are no support branches.
 

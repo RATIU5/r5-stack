@@ -50,7 +50,10 @@ AUTHOR_TYPE=Bot mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "bot P
 if AUTHOR_TYPE=User mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "user PRs are not exempt"; fi
 mkdir -p .changeset && printf -- '---\napp: patch\n---\n\n# x\n' > .changeset/x.md && git add -A && git commit -qm "chore(app): add changeset"
 mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes with a changeset"
-HEAD_REF=release SAME_REPO=true mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "release branch is exempt"
+git rm -q .changeset/x.md && git commit -qm "chore(app): consume changeset"
+if mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "a consumed changeset alone fails"; fi
+mkdir -p packages/web && echo "## 1.0.1" > packages/web/CHANGELOG.md && git add -A && git commit -qm "docs(app): changelog"
+mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes when a CHANGELOG.md changes"
 git checkout -q trunk
 echo "ok   changeset check"
 
@@ -78,6 +81,27 @@ change three
 mise x -- knope prepare-release > /dev/null
 [ "$(version)" = "1.1.0" ] || fail "graduate to stable"
 echo "ok   pre-release flow"
+
+mise tasks add fmt --description x -- touch fmt-ran > /dev/null
+mise tasks add changelog --description x -- knope changelog > /dev/null
+mise tasks add release:publish --description x -- knope release > /dev/null
+mkdir rel && cd rel && git init -q -b trunk && git config user.email t@example.com && git config user.name t
+cp ../mise.toml ../mise.lock . && mise trust -q
+echo '{"name":"app","version":"0.0.0"}' > package.json
+sed 's/OWNER/o/; s/REPO/r/; s/BRANCH/trunk/' "$skill/templates/knope.toml" > knope.toml
+mkdir .changeset && git add -A && git commit -qm "feat(app): init"
+printf -- '---\napp: minor\n---\n\n# Add thing\n' > .changeset/thing.md
+git add -A && git commit -qm "feat(app): add thing"
+mise run changelog > /dev/null 2>&1 || fail "local changelog run"
+[ -e fmt-ran ] || fail "changelog workflow runs fmt"
+[ ! -e .changeset/thing.md ] || fail "changelog run deletes the changeset"
+grep -q "Add thing (\[" CHANGELOG.md || fail "changelog entry has a link"
+git add -A && git commit -qm "chore(app): record changelog"
+mise run -q release:publish -- --dry-run 2> /dev/null | grep -q "app/v0.0.1" || fail "release gate sees an untagged version"
+git tag app/v0.0.1
+[ -z "$(mise run -q release:publish -- --dry-run 2> /dev/null)" ] || fail "release gate is empty when tagged"
+cd ..
+echo "ok   local changelog and release gate"
 
 mkdir ver && cd ver && git init -q -b trunk && git config user.email t@example.com && git config user.name t
 echo 1.0.0 > VERSION

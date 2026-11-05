@@ -1,6 +1,6 @@
 {
   "name": "r5-bootstrap",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Bootstrap, migrate and audit a GitHub repository for Claude Code: repo files, workflow doc, mise, Knope, cocogitto and GitHub Actions, then a settings hand-off",
   "author": {
     "name": "John Memmott",

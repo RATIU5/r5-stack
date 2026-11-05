@@ -35,7 +35,7 @@ Send one message listing every `partial` and `different` part with the diff or g
 - Tags: Knope cannot keep `vX.Y.Z` with `[packages.<name>]`. Default: new format, and alias tags for the latest version (`git tag <name>/vX.Y.Z vX.Y.Z^{}`) for the user to push. Without them `knope release` re-releases the current version.
 - `.gitignore`: show the diff against the allowlist and convert (below). Default convert.
 - Dependabot config present: offer Renovate instead (`references/repo.md`). Default keep Dependabot; its bot PRs are exempt from `changeset`, and its titles need `commit-message.prefix: "chore(deps)"` to pass `pr-title`.
-- Start each component at its latest tag's version in `versioned_files`.
+- Start each component at its latest tag's version in `versioned_files`. No tags, date-based versions or none: ask for the starting version. An existing production app starts at `0.0.0`; seed it once with `knope changelog --override-version <x.y.z>` (below 1.0.0 even `major` bumps only the minor number).
 - No lockfile: ask to run `<pm> install` once so the user commits it.
 - A bootstrap PR itself needs a changeset: write `.changeset/bootstrap.md` with `<component>: chore`. Default yes.
 - Pinned tool versions in `mise.toml`: never update unasked.
@@ -45,8 +45,8 @@ Send one message listing every `partial` and `different` part with the diff or g
 - **Workflows we manage** (an earlier template of ours): the template wins; show the diff. A job the old template had and the new one lacks (`commits`): show it, default replace, name the replacement. Say when a dropped job did work, such as a build step.
 - **The user's own workflow**: add the missing jobs under the template ids (`pr-title`, `changeset`, `check`), keep their jobs. These top-level keys change how their jobs run, so show them and ask: `pull_request.types` including `edited`, `merge_group`, `env.MISE_LOCKED`, `permissions`, `concurrency`. Add `if: github.event.action != 'edited'` to their jobs. Reuse the user's SHA for an action they already pin.
 - **mise tasks**: add missing tasks with `mise tasks add`. Never rename existing tasks; map the template step to the existing one.
-- **knope.toml**: add missing keys (`extra_changelog_sections`, workflows, `assets` when a `build` task exists). Check every regex `versioned_files` entry against the one in `references/knope.md`; fix a missing suffix group. Keep existing packages and versions. With existing history `knope --validate` works at once.
-- **CHANGELOG.md**: Knope inserts a release above the first `## X.Y.Z (date)` heading. Rewrite `## [X.Y.Z] - date` headings to that form after showing the lines. Convert an `[Unreleased]` section into `.changeset/*.md` files, then remove it.
+- **knope.toml**: add missing keys (`extra_changelog_sections`, `[release_notes]`, the `changelog` workflow, other workflows, `assets` when a `build` task exists). Check every regex `versioned_files` entry against the one in `references/knope.md`; fix a missing suffix group. Keep existing packages and versions. With existing history `knope --validate` works at once.
+- **CHANGELOG.md**: Knope inserts a release above the first `## X.Y.Z (date)` heading. Rewrite `## [X.Y.Z] - date` headings to that form after showing the lines. Date-headed entries (`## 2026.10.01`) need no rewrite: Knope inserts `## X.Y.Z (date)` above them and leaves them untouched. Convert an `[Unreleased]` or `## Unreleased` section into `.changeset/*.md` files, one per bullet (`# <short title>`, the bullet as the body), then remove it.
 - **`.changeset/README.md`**: Knope fails on a file without front matter. Ask; default delete.
 - **README, LICENSE, CODEOWNERS**: never overwrite. Add missing sections after asking.
 - **`docs/WORKFLOW.md`**: merge missing sections after asking; keep the project's own.
