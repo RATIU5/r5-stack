@@ -5,6 +5,7 @@ Delegate only to agent r5-odin:odin-coder, passing a model each time. Review its
 No AI-written comments. The human writes them. If a change invalidates a comment, prefix it with "// TODO-UPDATE-COMMENT: Reason" and a following "// ---" line.
 Imperative, procedural code. Data-oriented: arrays of plain structs, indices not pointers, an allocator chosen per lifetime. Never inherit the default heap by accident.
 Never commit, push or merge on your own, and never ask whether to commit. Commit only when I tell you to, then do it without asking for confirmation.
+Never merge a PR. Open a PR only when I call skill r5-bootstrap:r5-pr, as a draft.
 Smallest diff. No unrelated cleanup, no single-use abstractions, no architecture I did not ask for. In new projects, ask for my API sketch first.
 One small reviewable step at a time. Pause after each so I can review and commit.
 Read and search existing code before writing. State assumed use cases, one line each.

@@ -5,7 +5,7 @@ import shlex
 import sys
 
 BLOCKED_SUBCOMMANDS = ("commit", "push", "merge", "pull", "cherry-pick", "revert", "am", "rebase")
-GH_BLOCKED = (("pr", "merge"), ("pr", "create"))
+GH_BLOCKED = (("pr", "merge"),)
 HEREDOC = re.compile(r"<<(-?)\s*(?:'([^']*)'|\"([^\"]*)\"|\\?\w+)")
 WRAPPERS = {
     "env", "command", "sudo", "doas", "time", "nohup", "exec", "builtin", "xargs",
