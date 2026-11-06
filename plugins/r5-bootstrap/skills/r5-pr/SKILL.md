@@ -1,6 +1,6 @@
 ---
 name: r5-pr
-description: Create a draft pull request, or update the open one, with a title and description written from the branch's commits and diff. Runs only when the user calls it.
+description: When the user calls it, create a draft pull request or update the open one, with a title and description written from the branch's commits and diff.
 disable-model-invocation: true
 ---
 

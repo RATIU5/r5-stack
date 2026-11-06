@@ -88,7 +88,7 @@ for name, cmd, want in [
     ("revert", "git revert HEAD", "deny"),
     ("am", "git am x.patch", "deny"),
     ("gh pr merge", "gh pr merge 3 --squash", "deny"),
-    ("gh pr create", "gh pr create --fill", "deny"),
+    ("gh pr create", "gh pr create --fill", "allow"),
     ("sudo gh pr merge", "sudo gh pr merge 3", "deny"),
     ("gh pr view", "gh pr view 3", "allow"),
     ("gh pr list", "gh pr list", "allow"),

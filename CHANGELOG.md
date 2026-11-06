@@ -4,6 +4,11 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-odin 0.1.5] - 2026-11-06
+
+### Changed
+- r5-odin: the guard no longer blocks `gh pr create`, so `r5-bootstrap:r5-pr` can open a draft PR. `gh pr merge` stays blocked.
+
 ## [r5-bootstrap 0.5.0] - 2026-11-06
 
 ### Added
