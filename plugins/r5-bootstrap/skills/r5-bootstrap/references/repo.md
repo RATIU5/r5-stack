@@ -32,16 +32,7 @@ Only when the user names one: `gh api licenses/<spdx-id-lowercase> --jq .body`, 
 `.github/CODEOWNERS`, last match wins. Solo: `* @OWNER`. Team: `* @org/team` after checking that the team has write access (`gh api orgs/ORG/teams/TEAM/repos/OWNER/REPO --jq .permissions`); without it the entry is ignored. Add narrower lines (`/.github/`, `/scripts/`, `/mise.toml`) when a smaller group owns them. It only requests review until a ruleset requires code owner review.
 
 ## PR template
-`.github/pull_request_template.md`:
-```
-## What and why
-
-## Checklist
-- [ ] PR title is a Conventional Commit
-- [ ] Changeset added
-- [ ] Tests pass
-```
-Drop the title and changeset lines without `knope.toml`.
+`.github/pull_request_template.md`: copy `skills/r5-pr/templates/pull_request_template.md` from the plugin; `r5-pr` fills it. Drop the title and changeset lines without `knope.toml`.
 
 ## SECURITY.md
 Only for a public repo, when the user wants it: `Report vulnerabilities at https://github.com/OWNER/REPO/security/advisories/new. Do not open a public issue.` Add a supported-versions line only when releases exist.
