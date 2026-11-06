@@ -29,8 +29,9 @@ Send one message listing every `partial` and `different` part with the diff or g
 - Hook manager (husky, lefthook, pre-commit): keep it and add the check inside it. Husky: write `.husky/commit-msg` (not the generated `.husky/_`), executable. Lefthook: a `commit-msg` entry. pre-commit: a local hook. Replace the `cog install-hook` lines in `docs/WORKFLOW.md` and hand-off section 6 with the manager's install step.
 - commitlint: replace (two commit checkers conflict). Remove its config, devDependencies and scripts.
 - Release tool already present (release-please, semantic-release): ask. Default keep it and mark Release `skipped (kept <tool>)`. If replaced, remove its config, workflow, devDependencies, scripts and lockfile entries.
+- Hand-installed `.git/hooks/<name>` (no manager, clones never get it): move its body to `scripts/<name>.sh`, add `[git_hooks.<name>] script = 'sh scripts/<name>.sh'` to `cog.toml`, back up the old hook, run `mise x -- cog install-hook --all --overwrite`, and use `--all` in `docs/WORKFLOW.md` and hand-off section 6.
 - Old cog hook: `mise x -- cog install-hook --overwrite commit-msg`, then prove a bad message fails. Existing clones rerun it.
-- An existing CI job that does the work of `check` (for example `test`): do not duplicate it. List their job name as the required check in the hand-off.
+- An existing CI job that does the work of `check` (for example `test`): do not duplicate it. List their job name as the required check in the hand-off. Warn before renaming a job a ruleset requires.
 - Repo visibility unknown (`gh` cannot see the repo): ask; default private, which drops attest and `assets`.
 - Tags: Knope cannot keep `vX.Y.Z` with `[packages.<name>]`. Default: new format, and alias tags for the latest version (`git tag <name>/vX.Y.Z vX.Y.Z^{}`) for the user to push. Without them `knope release` re-releases the current version.
 - `.gitignore`: show the diff against the allowlist and convert (below). Default convert.
@@ -43,7 +44,7 @@ Send one message listing every `partial` and `different` part with the diff or g
 
 ## Part rules
 - **Workflows we manage** (an earlier template of ours): the template wins; show the diff. A job the old template had and the new one lacks (`commits`): show it, default replace, name the replacement. Say when a dropped job did work, such as a build step.
-- **The user's own workflow**: add the missing jobs under the template ids (`pr-title`, `changeset`, `check`), keep their jobs. These top-level keys change how their jobs run, so show them and ask: `pull_request.types` including `edited`, `merge_group`, `env.MISE_LOCKED`, `permissions`, `concurrency`. Add `if: github.event.action != 'edited'` to their jobs. Reuse the user's SHA for an action they already pin.
+- **The user's own workflow**: add the missing jobs under the template ids (`pr-title`, `changeset`, `check`), keep their jobs. These top-level keys change how their jobs run, so show them and ask: `pull_request.types` including `edited`, `merge_group`, `env.MISE_LOCKED`, `permissions`, `concurrency`. Add `if: github.event.action != 'edited'` to their jobs. Reuse the user's SHA for an action they already pin. After asking, rewrite their inline commands as `mise run` tasks (extra checks go into the nearest task), hoist step `env` to the job, and set `persist-credentials: false` on `actions/checkout`. Flag branch-name conditions; never carry them over silently.
 - **mise tasks**: add missing tasks with `mise tasks add`. Never rename existing tasks; map the template step to the existing one.
 - **knope.toml**: add missing keys (`extra_changelog_sections`, `[release_notes]`, the `changelog` workflow, other workflows, `assets` when a `build` task exists). Check every regex `versioned_files` entry against the one in `references/knope.md`; fix a missing suffix group. Keep existing packages and versions. With existing history `knope --validate` works at once.
 - **CHANGELOG.md**: Knope inserts a release above the first `## X.Y.Z (date)` heading. Rewrite `## [X.Y.Z] - date` headings to that form after showing the lines. Date-headed entries (`## 2026.10.01`) need no rewrite: Knope inserts `## X.Y.Z (date)` above them and leaves them untouched. Convert an `[Unreleased]` or `## Unreleased` section into `.changeset/*.md` files, one per bullet (`# <short title>`, the bullet as the body), then remove it.
@@ -51,10 +52,12 @@ Send one message listing every `partial` and `different` part with the diff or g
 - **README, LICENSE, CODEOWNERS**: never overwrite. Add missing sections after asking.
 - **`docs/WORKFLOW.md`**: merge missing sections after asking; keep the project's own.
 - **`.gitignore`** (last): convert to the allowlist form.
+  A pure allowlist has `*`, `!*/` and only `!` lines, no deny lines. Delete nested `.gitignore` files that only deny.
   1. Copy `templates/gitignore` over `.gitignore`, then add the language lines from `references/lang-*.md`.
-  2. Add every tracked file it hides, as directory globs: `git ls-files | git check-ignore --no-index --stdin | sed -E 's|^([^/]+)/.*|\1/**|' | sort -u | sed 's|^|!|' >> .gitignore`.
-  3. Repeat the `check-ignore` command; it must print nothing.
-  4. Run `git status --short --ignored`. Ask only if it lists untracked files that may be wanted.
+  2. Add every tracked file it hides, anchored. Root files: `git ls-files | git check-ignore --no-index --stdin | grep -v / | sed 's|^|!/|' >> .gitignore`. Folders: open a whole folder (`!/.github/**`) only when it holds no generated output. Otherwise add file types from what is tracked: `for d in $(git ls-files | git check-ignore --no-index --stdin | grep / | cut -d/ -f1 | sort -u); do git ls-files "$d" | sed -n 's/.*\.\([A-Za-z0-9]*\)$/\1/p' | sort -u | sed "s|^|!/$d/**/*.|"; done >> .gitignore`.
+  3. Repeat the `check-ignore` command; it must print nothing. Add leftovers by hand.
+  4. `git status --porcelain --untracked-files=all` must list no generated files. Ask only if it lists untracked files that may be wanted.
+  5. Formatters and linters read `.gitignore`: rerun `fmt` and `lint`.
 
 ## Finish
 Re-run the audit. Then hand off (`references/handoff.md`): list the new required checks and tell the user to remove stale ones (`commits`) from the ruleset. `lint:changeset` needs `origin/<base>` and committed changesets.

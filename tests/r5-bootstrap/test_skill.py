@@ -64,6 +64,10 @@ expect("SKILL.md: every template and script it names exists",
            ("templates/scripts/lint-commit.sh", "templates/scripts/check-changeset.sh", "templates/scripts/label-pr.sh",
             "templates/docs/WORKFLOW.md", "references/migrate.md", "templates/workflows/label-pr.yml", "templates/workflows/stale.yml")))
 
+ignore = [l for l in read("templates", "gitignore").splitlines() if l]
+expect("gitignore: only * , !*/ and anchored ! lines", all(l in ("*", "!*/") or l.startswith("!/") for l in ignore))
+expect("cog.toml: hook does not skip without mise", "command -v" not in read("templates", "cog.toml"))
+
 hook = os.path.join(PLUGIN, "scripts", "session_start.py")
 
 

@@ -12,7 +12,7 @@
 mise tasks add lint:title --description "Check a commit or PR title" -- sh scripts/lint-commit.sh
 mise tasks add lint:changeset --description "Check the PR adds a changeset" -- sh scripts/check-changeset.sh
 mise tasks add label:pr --description "Label a PR by its title type" -- sh scripts/label-pr.sh
-mise tasks add changelog --description "Record the changelog and version locally" -- knope changelog
+mise tasks add changelog --description "Record the changelog and version locally" -- sh -c 'GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token 2>/dev/null)}" knope changelog "$@"' _
 mise tasks add release:prepare --description "Open or refresh the release pull request" -- knope prepare-release
 mise tasks add release:publish --description "Create tags and GitHub releases" -- knope release
 ```

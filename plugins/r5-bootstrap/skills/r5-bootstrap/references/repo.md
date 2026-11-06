@@ -9,22 +9,27 @@ Small and generic. One sentence on what it is only when the project says so; els
 
 One sentence on what it is.
 
+## Prerequisites
+
+[mise](https://mise.jdx.dev/getting-started.html)
+
 ## Develop
 
 mise install
+mise x -- cog install-hook commit-msg
 mise run test
 
 ## License
 
 LICENSE_NAME
 ```
-Drop License when there is no LICENSE, and `mise run test` when no `test` task exists.
+Drop License when there is no LICENSE, `mise run test` when no `test` task exists, and the hook line without `cog.toml`.
 
 ## LICENSE
-Only when the user names one: `gh api licenses/<spdx-id-lowercase> --jq .body`, with the current year and `git config user.name`.
+Only when the user names one: `gh api licenses/<spdx-id-lowercase> --jq .body`, with the current year and `git config user.name`. Offer "proprietary/internal" with the SPDX choice. Proprietary: an all-rights-reserved `LICENSE`, `UNLICENSED` in the manifest, and keep existing third-party notices.
 
 ## CODEOWNERS
-`.github/CODEOWNERS`, last match wins. Solo: `* @OWNER`. Team: `* @org/team`, plus narrower lines (`/.github/`, `/scripts/`, `/mise.toml`) when a smaller group owns them. It only requests review until a ruleset requires code owner review.
+`.github/CODEOWNERS`, last match wins. Solo: `* @OWNER`. Team: `* @org/team` after checking that the team has write access (`gh api orgs/ORG/teams/TEAM/repos/OWNER/REPO --jq .permissions`); without it the entry is ignored. Add narrower lines (`/.github/`, `/scripts/`, `/mise.toml`) when a smaller group owns them. It only requests review until a ruleset requires code owner review.
 
 ## PR template
 `.github/pull_request_template.md`:
@@ -67,4 +72,4 @@ Renovate is the only dependency updater offered, never Dependabot. Only on a yes
 `semanticCommits` gives `chore(deps): ...` titles that pass `pr-title`. The `changeset` check skips bot PRs. The user installs the Renovate GitHub app.
 
 ## .gitignore
-Always the allowlist form: copy `templates/gitignore`, add the language lines and the project's source folders. An existing file is converted as in `references/migrate.md`.
+Always the allowlist form: `*`, `!*/` and only `!` lines, no deny lines. Copy `templates/gitignore`, add the language lines and the project's source folders. Every line is anchored with a leading `/`: a slash-less `!README*` re-includes files in generated folders. A new root file or file type needs a new line. An existing file is converted as in `references/migrate.md`.

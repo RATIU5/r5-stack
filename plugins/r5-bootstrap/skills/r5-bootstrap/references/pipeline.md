@@ -2,7 +2,7 @@
 
 ## Flow
 1. A PR carries code and a changeset. `ci.yml` runs `pr-title` (the squash message), `changeset` and `check` (`lint`, `test`). `label-pr.yml` labels it by title type. Every title needs a scope. Local commits may be `Revert "..."`, merge, fixup or squash!; PR titles may not (`revert(scope): ...`).
-2. `changeset` passes a PR that adds a changeset or changes a `CHANGELOG.md`, and exempts PRs created by bots or apps (Renovate). A person, or an agent acting as one, needs one of the two.
+2. `changeset` passes a PR that adds a changeset or records the changelog (deletes changesets, adds `CHANGELOG.md` lines), and exempts PRs created by bots or apps (Renovate). A person, or an agent acting as one, needs one of the two.
 3. Merge to `BRANCH`. `prepare-release.yml` opens or refreshes one release PR (versions, changelog, changesets removed). A push with no changesets skips it.
 4. Merge the release PR. `release.yml` runs on every push to `BRANCH`; when a version has no tag (`release:publish --dry-run` prints something) it builds, attests `dist/*`, and `release:publish` tags and creates the GitHub releases with the assets. A version recorded locally with `mise run changelog` in a feature PR is released the same way.
 5. `promote.yml` (manual) deploys a tag to an environment. Rollback is the same run with an older tag.
@@ -34,4 +34,4 @@ Roll forward with a fix PR and a normal release. Roll back with `promote.yml` an
 One `[packages.<name>]` per shippable component, each with its own `versioned_files` and `changelog`; a changeset names every component it affects. Per-component tasks (`dev:<name>`, `build:<name>`) only for components that exist. Artifacts in `dist/` are named by component.
 
 ## Other languages
-Find tools with `mise registry <name>`. Pick `versioned_files` from the native list in `knope.md` or a regex entry. Add `build`, `lint`, `test` tasks that call the language's CLI, depending on a `deps` task that installs with the frozen or locked flag.
+Find tools with `mise registry <name>`. Pick `versioned_files` from the native list in `knope.md` or a regex entry. Add `build`, `lint`, `test` tasks that call the language's CLI, depending on a `deps` task that installs with the frozen or locked flag. Give `deps` `sources` (lockfile) and `outputs` (install marker) so mise skips it when unchanged.

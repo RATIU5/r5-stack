@@ -18,6 +18,7 @@ Name, scope, value. Same source as secrets.
 One row per environment.
 
 ## 4. Ruleset on BRANCH (and staging if used)
+- Read existing rules (`gh api repos/OWNER/REPO/rulesets`); when one exists, word this section as changes to it.
 - Require a pull request. Approvals: solo 0, team 1 plus code owner review. A solo author cannot approve their own PR.
 - Required checks: `pr-title`, `changeset`, `check`, or the name of an existing job that runs the tests. Remove stale required checks (for example `commits`).
 - Block force pushes and deletion. Require linear history, except with a staging branch.

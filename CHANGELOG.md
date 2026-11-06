@@ -4,6 +4,15 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+### Fixed
+- r5-bootstrap: the allowlist `.gitignore` anchors every root-file line, so it no longer re-includes files inside `node_modules`, `dist` and tool folders; the migrate recipe derives file-type patterns instead of directory globs.
+- r5-bootstrap: `check-changeset.sh` needs a deleted changeset plus added `CHANGELOG.md` lines, not any `CHANGELOG.md` edit.
+- r5-bootstrap: the commit-msg hook fails without mise; `lint-commit.sh` rejects no arguments and a trailing period.
+- r5-bootstrap: `WORKFLOW.md` no longer claims checks block merges before the ruleset exists.
+
+### Added
+- r5-bootstrap: ruleset detection, own-CI-job rewrite rule, hand-installed hook migration, `deps` sources and outputs, `gh auth token` for local changelog runs, proprietary license and CODEOWNERS team checks.
+
 ## [r5-bootstrap 0.4.0] - 2026-11-05
 
 ### Added

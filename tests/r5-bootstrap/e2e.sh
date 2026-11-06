@@ -23,6 +23,7 @@ mise x -- cog install-hook commit-msg > /dev/null
 echo x > f && git add f
 if git commit -qm "bad message" 2> /dev/null; then fail "hook rejects a bad message"; fi
 git commit -qm "feat(app): good message" || fail "hook accepts a good message"
+if PATH=/usr/bin:/bin git commit -q --allow-empty -m "feat(app): no mise" 2> /dev/null; then fail "hook fails without mise"; fi
 echo "ok   commit-msg hook"
 
 git commit -q --allow-empty -m 'Revert "feat(app): good message"' || fail "hook accepts a revert"
@@ -37,6 +38,8 @@ mise run lint:title -- "feat(app)!: breaking" > /dev/null 2>&1 || fail "lint:tit
 if mise run lint:title -- "bad title" > /dev/null 2>&1; then fail "lint:title rejects a bad title"; fi
 if mise run lint:title -- 'Revert "feat(app): x"' > /dev/null 2>&1; then fail "lint:title rejects a Revert title"; fi
 if mise run lint:title -- "Feat: x" > /dev/null 2>&1; then fail "lint:title rejects an uppercase type"; fi
+if mise run lint:title -- "feat(app): x." > /dev/null 2>&1; then fail "lint:title rejects a trailing period"; fi
+if sh scripts/lint-commit.sh > /dev/null 2>&1; then fail "lint-commit.sh rejects no arguments"; fi
 echo "ok   lint:title"
 
 mkdir scripts 2> /dev/null || true
@@ -50,10 +53,11 @@ AUTHOR_TYPE=Bot mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "bot P
 if AUTHOR_TYPE=User mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "user PRs are not exempt"; fi
 mkdir -p .changeset && printf -- '---\napp: patch\n---\n\n# x\n' > .changeset/x.md && git add -A && git commit -qm "chore(app): add changeset"
 mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes with a changeset"
+git update-ref refs/remotes/origin/b2 HEAD
+mkdir -p packages/web && echo "## 1.0.1" > packages/web/CHANGELOG.md && git add -A && git commit -qm "docs(app): edit changelog"
+if mise run lint:changeset -- b2 > /dev/null 2>&1; then fail "a CHANGELOG-only edit fails"; fi
 git rm -q .changeset/x.md && git commit -qm "chore(app): consume changeset"
-if mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "a consumed changeset alone fails"; fi
-mkdir -p packages/web && echo "## 1.0.1" > packages/web/CHANGELOG.md && git add -A && git commit -qm "docs(app): changelog"
-mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes when a CHANGELOG.md changes"
+mise run lint:changeset -- b2 > /dev/null 2>&1 || fail "recording the changelog passes"
 git checkout -q trunk
 echo "ok   changeset check"
 
@@ -83,7 +87,7 @@ mise x -- knope prepare-release > /dev/null
 echo "ok   pre-release flow"
 
 mise tasks add fmt --description x -- touch fmt-ran > /dev/null
-mise tasks add changelog --description x -- knope changelog > /dev/null
+mise tasks add changelog --description x -- sh -c 'GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token 2>/dev/null)}" knope changelog "$@"' _ > /dev/null
 mise tasks add release:publish --description x -- knope release > /dev/null
 mkdir rel && cd rel && git init -q -b trunk && git config user.email t@example.com && git config user.name t
 cp ../mise.toml ../mise.lock . && mise trust -q
@@ -94,6 +98,7 @@ printf -- '---\napp: minor\n---\n\n# Add thing\n' > .changeset/thing.md
 git add -A && git commit -qm "feat(app): add thing"
 mise run changelog > /dev/null 2>&1 || fail "local changelog run"
 [ -e fmt-ran ] || fail "changelog workflow runs fmt"
+grep -q "^## 0.0.1" CHANGELOG.md || fail "changelog task"
 [ ! -e .changeset/thing.md ] || fail "changelog run deletes the changeset"
 grep -q "Add thing (\[" CHANGELOG.md || fail "changelog entry has a link"
 git add -A && git commit -qm "chore(app): record changelog"
@@ -136,16 +141,19 @@ mkdir ignore && cd ignore && git init -q
 cp "$skill/templates/gitignore" .gitignore
 mkdir -p .changeset .github/workflows dist docs
 touch mise.toml .changeset/a.md .github/workflows/ci.yml dist/out other.txt docs/WORKFLOW.md README.md AGENTS.md
+mkdir -p node_modules/x dist/docs .vercel
+touch node_modules/x/package.json node_modules/x/README.md node_modules/x/LICENSE dist/docs/CHANGELOG.md .vercel/README.txt
 listed=$(git add -A -n | sed "s/^add '//; s/'$//" | LC_ALL=C sort | tr '\n' ' ')
 [ "$listed" = ".changeset/a.md .github/workflows/ci.yml .gitignore AGENTS.md README.md docs/WORKFLOW.md mise.toml " ] || fail "gitignore allowlist: $listed"
 echo "ok   gitignore allowlist"
 
 cd .. && mkdir convert && cd convert && git init -q
-mkdir -p src tools && touch package.json src/a.ts tools/gen.py Makefile
+mkdir -p src tools dist && touch package.json src/a.ts tools/gen.py Makefile dist/gen.ts
 printf 'node_modules\ndist\n' > .gitignore
 git add -A -f && git commit -qm "feat(app): init"
 cp "$skill/templates/gitignore" .gitignore
-git ls-files | git check-ignore --no-index --stdin | sed -E 's|^([^/]+)/.*|\1/**|' | sort -u | sed 's|^|!|' >> .gitignore
+git ls-files | git check-ignore --no-index --stdin | grep -v / | sed 's|^|!/|' >> .gitignore
+for d in $(git ls-files | git check-ignore --no-index --stdin | grep / | cut -d/ -f1 | sort -u); do git ls-files "$d" | sed -n 's/.*\.\([A-Za-z0-9]*\)$/\1/p' | sort -u | sed "s|^|!/$d/**/*.|"; done >> .gitignore
 [ -z "$(git ls-files | git check-ignore --no-index --stdin || true)" ] || fail "converted allowlist hides tracked files"
 touch src/new.ts; mkdir node_modules; touch node_modules/x
 git add -A -n | grep -q "src/new.ts" || fail "converted allowlist shows new source files"

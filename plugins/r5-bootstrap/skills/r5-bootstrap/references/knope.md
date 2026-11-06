@@ -33,7 +33,7 @@ web: minor
 One `<package>: <type>` line per component. Types: `major`, `minor`, `patch`, and any type in `extra_changelog_sections` (the template adds `docs` and `chore`: own changelog section, patch bump). A package name matching no `[packages.<name>]` is ignored silently. Only changeset files belong in `.changeset/`. Pending changesets are the unreleased changes; the release PR turns them into the next version heading.
 
 ## Record locally
-`mise run changelog` runs the `changelog` workflow (`PrepareRelease`, then `fmt`). Commit `CHANGELOG.md`, the version bump and the deleted changesets in the feature PR. `check-changeset.sh` passes a PR that changes a `CHANGELOG.md`. In release mode a version recorded this way is tagged when the PR merges, because `release.yml` tags any untagged version. Pre-releases keep their changesets, so locally record stable versions only.
+`mise run changelog` runs the `changelog` workflow (`PrepareRelease`, then `fmt`). Commit `CHANGELOG.md`, the version bump and the deleted changesets in the feature PR. `check-changeset.sh` passes a PR that deletes changesets and adds lines to a `CHANGELOG.md`; a `CHANGELOG.md` edit alone does not pass. In release mode a version recorded this way is tagged when the PR merges, because `release.yml` tags any untagged version. Pre-releases keep their changesets, so locally record stable versions only.
 
 ## Changelog-only mode
 For "changelog, no releases". `knope.toml` keeps `[packages.<name>]` (no `assets`), `[changes]`, `[release_notes]` when links are wanted, `[github]` only with links, and the `changelog` workflow; delete the `prepare-release` and `release` workflows. Skip `release.yml`, `prepare-release.yml`, `promote.yml`, `RELEASE_TOKEN` and the `release:*` tasks. In `docs/WORKFLOW.md` replace the Release section with:
@@ -49,6 +49,8 @@ Knope has no link switch; `[release_notes] change_templates` in `templates/knope
 - `$summary` is the change file title, `$details` its body.
 - Knope adds one heading level: `### $summary` renders as `####` under `### Features`.
 - Recorded by CI after merge, or locally after the PR is open: PR links. Recorded locally before pushing: commit links for committed changesets, plain entries for uncommitted ones. Commit the changeset first, then run `mise run changelog`. A squash merge drops the branch commit from history; PR links survive it.
+
+`--dry-run` shows a placeholder `$pr_number` and calls no API. Without a token Knope warns and uses commit links, so the task sets `GITHUB_TOKEN` from `gh auth token`. `PrepareRelease` stages what it writes.
 
 Docs: https://knope.tech/reference/config-file/release-notes/, https://knope.tech/recipes/customizing-release-notes/, https://knope.tech/reference/config-file/steps/prepare-release/. Check templates against them, not memory.
 

@@ -17,10 +17,10 @@ No lockfile: the frozen install fails. Ask the user to run `<pm> install` once a
 When `package.json` has `packageManager`, pin that exact version (`mise use --pin pnpm@<version>`) so the frozen install matches the lockfile.
 
 ## .gitignore allowlist
-Add: `!package.json`, `!pnpm-lock.yaml` (or `!package-lock.json`, `!bun.lock`, `!deno.json`), `!tsconfig*.json`, `!src/**`, and each source folder the project has.
+Add anchored lines: `!/package.json`, `!/pnpm-lock.yaml` (or `!/package-lock.json`, `!/bun.lock`, `!/deno.json`), `!/tsconfig*.json`, `!/src/**`, and each source folder the project has.
 
 ## Tasks
-- `deps` runs the install above. `build`, `lint`, `test`, `fmt` depend on `deps` and call the package manager's `run` for the scripts `package.json` has. Add only scripts that exist.
+- `deps` runs the install above, with `sources`, `outputs` (`references/pipeline.md`). `build`, `lint`, `test`, `fmt` depend on `deps` and call the package manager's `run` for the scripts `package.json` has. Add only scripts that exist.
 - `build` writes the release artifact to `dist/`.
 - To reach any other package.json script through mise, add the `pkg` task from `mise.md`.
 
