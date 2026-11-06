@@ -4,11 +4,14 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-bootstrap 0.5.0] - 2026-11-06
+
 ### Added
-- r5-bootstrap: skill `r5-pr`, called by the user, creates a draft PR or updates the open one from the branch's commits and diff. It follows the repo's PR template or a bundled default, keeps `<!-- keep -->` sections, and asks before editing an existing PR.
+- r5-bootstrap: skill `r5-pr`, which the user calls to create a draft PR, or update the open one, from the branch's commits and diff. It uses the repo's PR template, else a bundled default.
 
 ### Changed
-- r5-bootstrap: agents may open a PR through `r5-pr`, as a draft. Merging and pushing stay with the user.
+- r5-bootstrap: the PR rules allow opening a PR through `r5-pr`, as a draft, and editing one with the user's permission. Pushing and merging stay with the user.
+- r5-bootstrap: the PR template for new repos now comes from `r5-pr`.
 
 ## [r5-bootstrap 0.4.1] - 2026-11-05
 
