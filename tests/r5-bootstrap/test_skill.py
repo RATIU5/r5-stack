@@ -59,6 +59,9 @@ for job in re.findall(r"^  ([\w-]+):\n    (?:if|runs-on)", ci, re.M):
 release_msg = "chore: prepare release"
 for name in ("templates/knope.toml", "templates/workflows/prepare-release.yml"):
     expect(name + ": release commit message", release_msg in read(*name.split("/")))
+release_branch = re.findall(r"switch -c (\S+)|origin (\S+)'", read("templates", "knope.toml"))
+expect("release branch: knope.toml uses one name", len({n for pair in release_branch for n in pair if n}) == 1)
+expect("release branch: ci.yml matches knope.toml", "github.head_ref != 'release'" in ci)
 expect("SKILL.md: every template and script it names exists",
        all(os.path.exists(os.path.join(SKILL, p)) for p in
            ("templates/scripts/lint-commit.sh", "templates/scripts/check-changeset.sh", "templates/scripts/label-pr.sh",
@@ -68,6 +71,10 @@ ignore = [l for l in read("templates", "gitignore").splitlines() if l]
 expect("gitignore: only * , !*/ and anchored ! lines", all(l in ("*", "!*/") or l.startswith("!/") for l in ignore))
 expect("cog.toml: hook does not skip without mise", "command -v" not in read("templates", "cog.toml"))
 
+expr = re.search(r"PRERELEASE: \$\{\{ (.+) \}\}", read("templates", "workflows", "prepare-release.yml")).group(1)
+py = expr.replace("inputs.prerelease", "v").replace("&&", " and ").replace("||", " or ")
+for choice, label in (("none", ""), ("alpha", "alpha"), ("beta", "beta"), ("rc", "rc")):
+    expect("prepare-release.yml: %s gives label %r" % (choice, label), eval(py, {"v": choice}) == label)
 hook = os.path.join(PLUGIN, "scripts", "session_start.py")
 
 

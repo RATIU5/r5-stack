@@ -38,8 +38,16 @@ mise run lint:title -- "feat(app)!: breaking" > /dev/null 2>&1 || fail "lint:tit
 if mise run lint:title -- "bad title" > /dev/null 2>&1; then fail "lint:title rejects a bad title"; fi
 if mise run lint:title -- 'Revert "feat(app): x"' > /dev/null 2>&1; then fail "lint:title rejects a Revert title"; fi
 if mise run lint:title -- "Feat: x" > /dev/null 2>&1; then fail "lint:title rejects an uppercase type"; fi
+for bad in "feat: add (x): y" "fix: see (docs): later" "feat(): x" "feat(app):x" "feat(a)(b): x"; do
+  if mise run lint:title -- "$bad" > /dev/null 2>&1; then fail "lint:title rejects: $bad"; fi
+done
 if mise run lint:title -- "feat(app): x." > /dev/null 2>&1; then fail "lint:title rejects a trailing period"; fi
 if sh scripts/lint-commit.sh > /dev/null 2>&1; then fail "lint-commit.sh rejects no arguments"; fi
+printf 'feat(app): x.\r\n' > crlf.msg
+if sh scripts/lint-commit.sh --file crlf.msg > /dev/null 2>&1; then fail "lint-commit.sh rejects a CRLF title with a period"; fi
+printf 'feat(app): x\n\nbody ends here.\n' > body.msg
+sh scripts/lint-commit.sh --file body.msg > /dev/null 2>&1 || fail "lint-commit.sh checks only the first line"
+if sh scripts/lint-commit.sh --file > /dev/null 2>&1; then fail "lint-commit.sh --file needs a path"; fi
 echo "ok   lint:title"
 
 mkdir scripts 2> /dev/null || true
@@ -53,11 +61,19 @@ AUTHOR_TYPE=Bot mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "bot P
 if AUTHOR_TYPE=User mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "user PRs are not exempt"; fi
 mkdir -p .changeset && printf -- '---\napp: patch\n---\n\n# x\n' > .changeset/x.md && git add -A && git commit -qm "chore(app): add changeset"
 mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "changeset check passes with a changeset"
-git update-ref refs/remotes/origin/b2 HEAD
-mkdir -p packages/web && echo "## 1.0.1" > packages/web/CHANGELOG.md && git add -A && git commit -qm "docs(app): edit changelog"
-if mise run lint:changeset -- b2 > /dev/null 2>&1; then fail "a CHANGELOG-only edit fails"; fi
-git rm -q .changeset/x.md && git commit -qm "chore(app): consume changeset"
-mise run lint:changeset -- b2 > /dev/null 2>&1 || fail "recording the changelog passes"
+sh scripts/check-changeset.sh nonexist > /dev/null 2>&1 && fail "missing base fails"
+[ "$(sh scripts/check-changeset.sh nonexist > /dev/null 2>&1; echo $?)" = 2 ] || fail "missing base exits 2"
+if sh scripts/check-changeset.sh > /dev/null 2>&1; then fail "check-changeset.sh needs a base"; fi
+git checkout -q -b rd trunk && git checkout -q topic -- scripts mise.toml
+mkdir -p .changeset && printf -- '---\napp: patch\n---\n' > .changeset/README.md && git add -A && git commit -qm "docs(app): readme"
+if mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "a .changeset/README.md alone fails"; fi
+git checkout -q -f topic
+mkdir -p packages/web && echo "typo" > packages/web/CHANGELOG.md && git add -A && git commit -qm "docs(app): edit changelog"
+git rm -q .changeset/x.md && git commit -qm "chore(app): drop changeset"
+if mise run lint:changeset -- trunk > /dev/null 2>&1; then fail "a CHANGELOG-only edit fails"; fi
+git checkout -q HEAD~1 -- .changeset/x.md && echo "## 1.0.1 (d)" > packages/web/CHANGELOG.md && git add -A && git commit -qm "docs(app): heading with pending changeset"
+git rm -q .changeset/x.md && git commit -qm "chore(app): record changelog"
+mise run lint:changeset -- trunk > /dev/null 2>&1 || fail "recording in the same PR passes"
 git checkout -q trunk
 echo "ok   changeset check"
 

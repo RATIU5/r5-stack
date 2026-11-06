@@ -19,7 +19,7 @@ env:
 
 jobs:
   pr-title:
-    if: github.event_name == 'pull_request' && github.head_ref != 'release'
+    if: github.event_name == 'pull_request' && (github.head_ref != 'release' || github.event.pull_request.head.repo.full_name != github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -34,7 +34,7 @@ jobs:
       - run: mise run lint:title -- "$TITLE"
 
   changeset:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && (github.head_ref != 'release' || github.event.pull_request.head.repo.full_name != github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
