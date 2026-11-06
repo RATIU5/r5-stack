@@ -4,6 +4,8 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-bootstrap 0.4.1] - 2026-11-05
+
 ### Fixed
 - r5-bootstrap: the allowlist `.gitignore` anchors every root-file line, so it no longer re-includes files inside `node_modules`, `dist` and tool folders; the migrate recipe derives file-type patterns instead of directory globs.
 - r5-bootstrap: `check-changeset.sh` needs a deleted changeset plus added `CHANGELOG.md` lines, not any `CHANGELOG.md` edit.
