@@ -29,6 +29,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@SHA
+        with:
+          install_args: cocogitto
       - run: mise run lint:title -- "$TITLE"
 
   changeset:
@@ -44,6 +46,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: jdx/mise-action@SHA
+        with:
+          install: false
       - run: mise run lint:changeset -- "$BASE"
 
   check:

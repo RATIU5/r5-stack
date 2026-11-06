@@ -34,4 +34,4 @@ Roll forward with a fix PR and a normal release. Roll back with `promote.yml` an
 One `[packages.<name>]` per shippable component, each with its own `versioned_files` and `changelog`; a changeset names every component it affects. Per-component tasks (`dev:<name>`, `build:<name>`) only for components that exist. Artifacts in `dist/` are named by component.
 
 ## Other languages
-Find tools with `mise registry <name>`. Pick `versioned_files` from the native list in `knope.md` or a regex entry. Add `build`, `lint`, `test` tasks that call the language's CLI, depending on a `deps` task that installs with the frozen or locked flag. Give `deps` `sources` (lockfile) and `outputs` (install marker) so mise skips it when unchanged.
+Find tools with `mise registry <name>`. Pick `versioned_files` from the native list in `knope.md` or a regex entry. Add `build`, `lint`, `test` tasks that call the language's CLI, depending on a `deps` task that installs with the frozen or locked flag. Give `deps` `sources` (lockfile and manifest) and `outputs` (install marker) so mise skips it when unchanged.
