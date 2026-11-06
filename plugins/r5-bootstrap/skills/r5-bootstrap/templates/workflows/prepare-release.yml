@@ -43,4 +43,4 @@ jobs:
         run: mise run release:prepare -- ${PRERELEASE:+--prerelease-label "$PRERELEASE"}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          PRERELEASE: ${{ inputs.prerelease == 'none' && '' || inputs.prerelease }}
+          PRERELEASE: ${{ inputs.prerelease != 'none' && inputs.prerelease || '' }}

@@ -4,11 +4,10 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 
 ## Rules
 1. Branch from `BRANCH`. Open a PR. Never push to `BRANCH`.
-2. Write Conventional Commit messages: `type(scope): summary`.
-3. Title the PR the same way. The PR title becomes the squash commit on `BRANCH`.
-4. Every PR adds one changeset file or records the changelog.
-5. Merge the release PR to ship. Never tag or publish by hand.
-6. Only a person merges a PR. Agents never merge and never enable auto-merge.
+2. Write Conventional Commit messages and PR titles: `type(scope): summary`. The PR title becomes the squash commit on `BRANCH`.
+3. Every PR adds one changeset file or records the changelog.
+4. Merge the release PR to ship. Never tag or publish by hand.
+5. Only a person merges a PR. Agents never merge and never enable auto-merge.
 
 ## Commits
 - Format: `type(scope): summary`. Scope is required: the component or area, such as `api`, `ci`, `docs` or `deps`. Add `!` before the colon for a breaking change.
@@ -19,7 +18,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 - Revert with a title like `revert(api): add x`.
 
 ## Pull requests
-- Title: same format as a commit. CI labels the PR with its type.
+- CI labels the PR with its title type.
 - Small and focused: one concern per PR.
 - Fill in the PR template. Squash merge only.
 - PRs with no activity for 45 days are closed after a warning. Add the `keep-open` label to stop that.
@@ -34,13 +33,14 @@ app: minor
 
 # Add the thing
 ```
+- Create one with `mise run logchange`, or write the file.
 - Use one line per component: `<component>: <type>`.
 - Types: `major`, `minor`, `patch` bump the version. `docs` and `chore` get their own changelog section and bump the patch version.
 - The commit or PR type never changes the version. Only the changeset does.
 - The title line is the changelog entry. Write it for a user, not a developer.
 - Keep only changeset files in `.changeset/`.
 - Record locally instead: commit the changeset, push, open the PR, then run `mise run changelog` and commit `CHANGELOG.md`, the version bump and the deleted changesets in the same PR.
-- Changelog entries link to the PR when recorded after the PR is open (needs `GITHUB_TOKEN`), to the commit that added the changeset otherwise, and have no link for an uncommitted changeset.
+- Entries link to the PR when recorded after the PR is open, else to the commit that added the changeset.
 
 ## Checks
 | Check | Enforces | Run locally |
@@ -62,9 +62,7 @@ Once the repository ruleset requires these checks, a red check blocks the merge.
 ## Setup
 - Install mise (https://mise.jdx.dev/getting-started.html), then `mise install` for the pinned tools.
 - `mise tasks` lists every task.
-- Run the hook install from Commits once per clone.
 
 ## When a check fails
 - `pr-title`: edit the PR title. The check reruns on edit.
 - `changeset`: add `.changeset/<name>.md`, then push.
-- Hook rejects a message: fix it, commit again. Do not bypass it.

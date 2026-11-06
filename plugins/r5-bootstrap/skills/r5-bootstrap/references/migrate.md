@@ -11,7 +11,7 @@ One flow for a new repo, a repo with part of the stack, and a repo set up by an 
 Run in bash. `T` is this skill's `templates/` folder.
 ```
 T=<skill dir>/templates; B=<branch>; O=<owner>; R=<repo>
-render() { sed -E "s/@SHA//; s/BRANCH/$B/g; s/OWNER/$O/g; s/REPO/$R/g" "$1"; }
+render() { sed -E "s/@SHA//; s/BRANCH/$B/g; s/OWNER/$O/g; s/REPO([^A-Z]|\$)/$R\\1/g" "$1"; }
 diff <(sed -E 's/@[0-9a-f]{40}//' .github/workflows/ci.yml) <(render $T/workflows/ci.yml)
 ```
 Repeat for every managed file: workflows, `knope.toml`, `cog.toml`, `scripts/*`, `docs/WORKFLOW.md`. Project values (component names, `versioned_files`, deploy steps) differ on purpose. Class each part:
