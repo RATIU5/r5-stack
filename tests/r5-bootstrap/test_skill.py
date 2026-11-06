@@ -75,6 +75,15 @@ expr = re.search(r"PRERELEASE: \$\{\{ (.+) \}\}", read("templates", "workflows",
 py = expr.replace("inputs.prerelease", "v").replace("&&", " and ").replace("||", " or ")
 for choice, label in (("none", ""), ("alpha", "alpha"), ("beta", "beta"), ("rc", "rc")):
     expect("prepare-release.yml: %s gives label %r" % (choice, label), eval(py, {"v": choice}) == label)
+pr_skill = open(os.path.join(PLUGIN, "skills", "r5-pr", "SKILL.md"), encoding="utf-8").read()
+pr_template = open(os.path.join(PLUGIN, "skills", "r5-pr", "templates", "pull_request_template.md"), encoding="utf-8").read()
+expect("r5-pr: only runs when the user calls it", "disable-model-invocation: true" in pr_skill)
+expect("r5-pr: creates drafts", "gh pr create --draft" in pr_skill)
+expect("r5-pr: keeps <!-- keep --> sections", "<!-- keep -->" in pr_skill and "<!-- /keep -->" in pr_skill)
+expect("r5-pr: default template has the title and changeset checks", "Conventional Commit" in pr_template and "Changeset" in pr_template)
+expect("repo.md: PR template comes from r5-pr", "skills/r5-pr/templates/pull_request_template.md" in read("references", "repo.md"))
+expect("WORKFLOW.md: names r5-pr", "r5-bootstrap:r5-pr" in doc)
+
 hook = os.path.join(PLUGIN, "scripts", "session_start.py")
 
 

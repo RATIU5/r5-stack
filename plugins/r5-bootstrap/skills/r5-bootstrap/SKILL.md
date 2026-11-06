@@ -57,7 +57,7 @@ For an unfamiliar tool or flag, read `<tool> --help` and `<tool> <subcommand> --
 - Every PR adds a changeset by hand or records the changelog locally (`references/knope.md`); the `changeset` check enforces it.
 - Build once. Promotion and rollback deploy the attested release artifact.
 - No comments in generated or templated files.
-- Never run a release, deploy or promotion. Never push, open or merge a PR, or enable auto-merge: only the user merges. Never write a secret to a file.
+- Never run a release, deploy or promotion. Never push or merge a PR, or enable auto-merge: only the user merges. Open or edit a PR only through `r5-bootstrap:r5-pr`. Never write a secret to a file.
 
 ## Hand off
 End with `references/handoff.md`, filled with real names, sections in order. Apply nothing to GitHub. Wait for the user to confirm; the workflows fail until the secrets and environments exist.
