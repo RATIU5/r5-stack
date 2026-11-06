@@ -8,9 +8,11 @@ range="origin/$base...HEAD"
 if git diff --name-only --diff-filter=A "$range" -- '.changeset/*.md' | grep -q .; then
   exit 0
 fi
-recorded=$(git diff --name-only --diff-filter=D "$range" -- '.changeset/*.md')
-added=$(git diff --numstat "$range" -- '*CHANGELOG.md' | awk '{ n += $1 } END { print n + 0 }')
-if [ -n "$recorded" ] && [ "$added" -gt 0 ]; then
+if git diff "$range" -- '*CHANGELOG.md' | grep -Eq '^\+## [0-9]+\.[0-9]+\.[0-9]+'; then
+  if git ls-tree -r --name-only HEAD .changeset/ | grep -q '\.md$'; then
+    echo "CHANGELOG.md has a new version but changesets are still pending. Run mise run changelog." >&2
+    exit 1
+  fi
   exit 0
 fi
 echo "Add a changeset file .changeset/<name>.md or record the changelog. See docs/WORKFLOW.md." >&2

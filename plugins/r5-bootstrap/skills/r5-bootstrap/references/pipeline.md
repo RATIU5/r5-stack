@@ -2,7 +2,7 @@
 
 ## Flow
 1. A PR carries code and a changeset. `ci.yml` runs `pr-title` (the squash message), `changeset` and `check` (`lint`, `test`). `label-pr.yml` labels it by title type. Every title needs a scope. Local commits may be `Revert "..."`, merge, fixup or squash!; PR titles may not (`revert(scope): ...`).
-2. `changeset` passes a PR that adds a changeset or records the changelog (deletes changesets, adds `CHANGELOG.md` lines), and exempts PRs created by bots or apps (Renovate). A person, or an agent acting as one, needs one of the two.
+2. `changeset` passes a PR that adds a changeset or adds a new `CHANGELOG.md` version heading with no changesets pending, and exempts PRs created by bots or apps (Renovate). A person, or an agent acting as one, needs one of the two.
 3. Merge to `BRANCH`. `prepare-release.yml` opens or refreshes one release PR (versions, changelog, changesets removed). A push with no changesets skips it.
 4. Merge the release PR. `release.yml` runs on every push to `BRANCH`; when a version has no tag (`release:publish --dry-run` prints something) it builds, attests `dist/*`, and `release:publish` tags and creates the GitHub releases with the assets. A version recorded locally with `mise run changelog` in a feature PR is released the same way.
 5. `promote.yml` (manual) deploys a tag to an environment. Rollback is the same run with an older tag.
