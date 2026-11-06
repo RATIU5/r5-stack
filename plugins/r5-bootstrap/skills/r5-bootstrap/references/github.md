@@ -19,3 +19,6 @@ Required status checks and pull requests. Leave tag creation unrestricted: the r
 
 ## Attestation
 `actions/attest` with `subject-path` and permissions `id-token: write`, `attestations: write`, `contents: read`. Verify with `gh attestation verify <file> --repo <owner>/<repo>`. Private and internal repos need Enterprise Cloud.
+
+## mise-action in light jobs
+`pr-title` installs only `cocogitto` (`install_args`); `changeset` needs no tools (`install: false`). Tools a job adds go in its `install_args`.
