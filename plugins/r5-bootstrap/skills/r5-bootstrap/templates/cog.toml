@@ -1,2 +1,2 @@
 [git_hooks.commit-msg]
-script = 'if command -v mise > /dev/null; then mise x -- sh scripts/lint-commit.sh --file "$1"; fi'
+script = 'mise x -- sh scripts/lint-commit.sh --file "$1"'

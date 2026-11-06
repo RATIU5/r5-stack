@@ -26,7 +26,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 - Workflows on pull requests never get secrets. Do not add any.
 
 ## Changesets
-A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate) do not. A PR that changes `CHANGELOG.md` also passes the check. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
+A changeset is a file `.changeset/<short-name>.md`. Every PR from a person or an agent needs one. PRs created by bots or apps (Renovate) do not. A PR that records the changelog (deletes changesets and adds lines to `CHANGELOG.md`) also passes the check. Pending changesets are the unreleased changes. The release PR turns them into the next version heading in `CHANGELOG.md` and deletes them.
 ```
 ---
 app: minor
@@ -37,7 +37,6 @@ app: minor
 - Use one line per component: `<component>: <type>`.
 - Types: `major`, `minor`, `patch` bump the version. `docs` and `chore` get their own changelog section and bump the patch version.
 - The commit or PR type never changes the version. Only the changeset does.
-- Below 1.0.0 a `minor` change bumps the patch number.
 - The title line is the changelog entry. Write it for a user, not a developer.
 - Keep only changeset files in `.changeset/`.
 - Record locally instead: commit the changeset, push, open the PR, then run `mise run changelog` and commit `CHANGELOG.md`, the version bump and the deleted changesets in the same PR.
@@ -47,11 +46,11 @@ app: minor
 | Check | Enforces | Run locally |
 |---|---|---|
 | `pr-title` | PR title is a Conventional Commit (the release PR is exempt) | `mise run lint:title -- "feat(api): x"` |
-| `changeset` | PR adds a changeset or changes `CHANGELOG.md` (bot and app PRs are exempt) | `mise run lint:changeset -- BRANCH` |
+| `changeset` | PR adds a changeset or records the changelog (bot and app PRs are exempt) | `mise run lint:changeset -- BRANCH` |
 | `check` | lint and tests pass | `mise run lint`, `mise run test` |
 | commit-msg hook | each local commit message | runs on `git commit` |
 
-Required checks are set in the repository ruleset. A red check blocks the merge.
+Once the repository ruleset requires these checks, a red check blocks the merge.
 
 ## Release
 1. Changes merge to `BRANCH`. A bot opens or updates one release PR with versions and the changelog for the pending changesets.
@@ -61,7 +60,7 @@ Required checks are set in the repository ruleset. A red check blocks the merge.
 5. Fix a bad release by merging a new fix PR and releasing forward. There are no support branches.
 
 ## Setup
-- `mise install` installs the pinned tools.
+- Install mise (https://mise.jdx.dev/getting-started.html), then `mise install` for the pinned tools.
 - `mise tasks` lists every task.
 - Run the hook install from Commits once per clone.
 
