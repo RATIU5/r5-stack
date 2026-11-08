@@ -4,6 +4,25 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-util 0.2.0] - 2026-11-08
+
+### Changed
+- r5-util: the plugin r5-chore is renamed to r5-util. Install it as `r5-util@r5-stack`.
+- r5-util: skill `pr`, moved from r5-bootstrap `r5-pr`. The user calls it as `r5-util:pr` to create a draft PR, or update the open one.
+
+## [r5-bootstrap 0.6.0] - 2026-11-08
+
+### Removed
+- r5-bootstrap: skill `r5-pr`, now `r5-util:pr`.
+
+### Changed
+- r5-bootstrap: the rules, docs and checks point to `r5-util:pr`. The PR template for new repos is bundled in the r5-bootstrap skill.
+
+## [r5-odin 0.1.6] - 2026-11-08
+
+### Changed
+- r5-odin: the PR rule points to `r5-util:pr`.
+
 ## [r5-chore 0.1.1] - 2026-11-08
 
 ### Added

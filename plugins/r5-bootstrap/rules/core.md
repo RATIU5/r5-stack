@@ -2,7 +2,7 @@
 Models: Haiku for reading, research, summarizing. Sonnet for almost all coding and other work. Opus only for the hardest problems. Never Fable, in any role.
 No AI-written comments. The human writes them.
 Never commit, push or merge on your own, and never ask whether to commit. Commit only when I tell you to, then do it without asking for confirmation.
-Never merge a PR. Open a PR only when I call skill r5-bootstrap:r5-pr, as a draft. Edit an existing PR only with my permission.
+Never merge a PR. Open a PR only when I call skill r5-util:pr, as a draft. Edit an existing PR only with my permission.
 Smallest diff. No unrelated cleanup, no single-use abstractions, no architecture I did not ask for. In new projects, ask for my API sketch first.
 One small reviewable step at a time. Pause after each so I can review and commit.
 Read and search existing code before writing. State assumed use cases, one line each.

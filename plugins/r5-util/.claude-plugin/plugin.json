@@ -1,0 +1,13 @@
+{
+  "name": "r5-util",
+  "version": "0.2.0",
+  "description": "Chore skills for Claude Code: audit and improve LLM context docs, create and update draft PRs",
+  "author": {
+    "name": "John Memmott",
+    "url": "https://github.com/RATIU5"
+  },
+  "repository": "https://github.com/RATIU5/r5-stack",
+  "homepage": "https://github.com/RATIU5/r5-stack",
+  "license": "MIT",
+  "keywords": ["util", "docs", "context", "claude-md", "agents-md", "audit", "pr"]
+}
