@@ -6,6 +6,7 @@ My personal Claude Code plugins for various programming languages and tasks.
 | --------- | -------------------------------------------------------------------------------------------------- |
 | `r5-odin` | Rules, skills, an agent and guard hooks for writing Odin, including allocators, C mapping and FFI. |
 | `r5-bootstrap` | A skill that audits a repo and sets up what is missing: README, CODEOWNERS, mise, Knope, cocogitto, GitHub Actions, plus a GitHub settings hand-off. |
+| `r5-chore` | Chore skills. `improve-context` audits and improves CLAUDE.md, AGENTS.md and other LLM context docs. |
 
 ## Install
 
@@ -15,6 +16,7 @@ In Claude Code:
 /plugin marketplace add RATIU5/r5-stack
 /plugin install r5-odin@r5-stack
 /plugin install r5-bootstrap@r5-stack
+/plugin install r5-chore@r5-stack
 ```
 
 Or from a shell:
@@ -23,6 +25,7 @@ Or from a shell:
 claude plugin marketplace add RATIU5/r5-stack
 claude plugin install r5-odin@r5-stack
 claude plugin install r5-bootstrap@r5-stack
+claude plugin install r5-chore@r5-stack
 ```
 
 ### Requirements
@@ -37,6 +40,7 @@ claude plugin install r5-bootstrap@r5-stack
 .claude-plugin/marketplace.json
 plugins/r5-odin/           Odin plugin
 plugins/r5-bootstrap/      repo bootstrap plugin
+plugins/r5-chore/          chore skills plugin
 tests/r5-odin/             hook tests and the allocator test suite
 tests/r5-bootstrap/        skill checks and an end-to-end tool test
 ```

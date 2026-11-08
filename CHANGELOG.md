@@ -4,6 +4,16 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-chore 0.1.1] - 2026-11-08
+
+### Added
+- r5-chore: new plugin for chore skills, with skill `improve-context` to audit and improve LLM context docs.
+- r5-chore: `rules/core.md` with the shared core rules. It is a reference file and is not injected by a hook.
+
+### Changed
+- r5-chore: the skill never uses or suggests Opus unless the user asks for it by name, never uses Fable, and never forks agents.
+- r5-chore: the skill measures characters with `wc -m`, states the size limit once, merges the analysis categories into six, and writes the plan and backups to a `mktemp -d` directory.
+
 ## [r5-odin 0.1.5] - 2026-11-06
 
 ### Changed
