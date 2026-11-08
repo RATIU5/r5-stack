@@ -4,6 +4,9 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+### Added
+- r5-chore 0.1.0: new plugin for chore skills, with skill `improve-context` to audit and improve LLM context docs.
+
 ## [r5-odin 0.1.5] - 2026-11-06
 
 ### Changed
