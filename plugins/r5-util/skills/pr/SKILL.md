@@ -28,7 +28,7 @@ First found wins: `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMP
 `type(scope): summary`, from the commits and the diff. Squash merge makes it the commit on the base branch. With a `lint:title` task, run `mise run lint:title -- "<title>"` and fix the title until it passes. Else use the rule in `docs/WORKFLOW.md`, else plain Conventional Commits.
 
 ## Body
-Fill each template section from the commits and the diff, why before how. A section the diff does not answer stays blank. Tick a checklist line only for a check you ran: the title after `lint:title` passes, the changeset after `mise run lint:changeset -- origin/BASE` passes. Never tick tests: do not run them.
+Fill each template section from the commits and the diff, why before how. Remove the HTML comments. Delete a section marked "Delete" when it does not apply. Any other section the diff does not answer stays blank, except Linked issues, which says N/A with no issue. Never leave Testing blank: say what was run, or that nothing was. Tick a checklist line only for a check you ran or can see in the diff: the title after `lint:title` passes, the changeset after `mise run lint:changeset -- origin/BASE` passes, tests or docs only when the diff changes them. Never tick "Tests pass": do not run them.
 
 ## Update
 1. Read the current body.
