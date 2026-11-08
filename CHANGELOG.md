@@ -4,6 +4,16 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-util 0.2.1] - 2026-11-08
+
+### Changed
+- r5-util: the `pr` template has sections for why, what changed, linked issues, testing, breaking changes, risk and rollback, and reviewer notes, plus a checklist. The skill removes the template comments and deletes sections that do not apply.
+
+## [r5-bootstrap 0.6.1] - 2026-11-08
+
+### Changed
+- r5-bootstrap: no longer creates a PR template. The template lives only in `r5-util:pr`.
+
 ## [r5-util 0.2.0] - 2026-11-08
 
 ### Changed
@@ -16,7 +26,7 @@ All notable changes to the plugins in this repository are recorded here, newest 
 - r5-bootstrap: skill `r5-pr`, now `r5-util:pr`.
 
 ### Changed
-- r5-bootstrap: the rules, docs and checks point to `r5-util:pr`. The PR template for new repos is bundled in the r5-bootstrap skill.
+- r5-bootstrap: the rules, docs and checks point to `r5-util:pr`.
 
 ## [r5-odin 0.1.6] - 2026-11-08
 

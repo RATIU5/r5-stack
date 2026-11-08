@@ -13,7 +13,7 @@ Read the repo, then print one table: each part below as `present`, `partial`, `d
 | Source and toolchain | a language manifest or source files; `mise.toml` |
 | `.gitignore` | allowlist form (`*` first, then `!` lines) |
 | README, LICENSE | `README*`, `LICENSE*` exist; LICENSE only when the user names one |
-| CODEOWNERS, PR template | `.github/CODEOWNERS`, `.github/pull_request_template.md` |
+| CODEOWNERS | `.github/CODEOWNERS` |
 | `.editorconfig` | file exists |
 | `SECURITY.md` | exists; offer only for a public repo |
 | Renovate | `renovate.json`; add only when the user says yes. An existing Dependabot config counts as `different` |

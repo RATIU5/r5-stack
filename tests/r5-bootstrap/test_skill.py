@@ -76,12 +76,7 @@ py = expr.replace("inputs.prerelease", "v").replace("&&", " and ").replace("||",
 for choice, label in (("none", ""), ("alpha", "alpha"), ("beta", "beta"), ("rc", "rc")):
     expect("prepare-release.yml: %s gives label %r" % (choice, label), eval(py, {"v": choice}) == label)
 pr_skill = open(os.path.join(ROOT, "plugins", "r5-util", "skills", "pr", "SKILL.md"), encoding="utf-8").read()
-pr_template = read("templates", "pull_request_template.md")
 expect("r5-util:pr: only runs when the user calls it", "disable-model-invocation: true" in pr_skill)
-template_path = re.search(r"copy `(templates/pull_request_template.md)`", read("references", "repo.md")).group(1)
-expect("repo.md: the PR template path exists", os.path.isfile(os.path.join(SKILL, template_path)))
-for job, words in (("pr-title", "Conventional Commit"), ("changeset", "Changeset")):
-    expect("PR template: ci job %s has a checklist line" % job, re.search(r"^  %s:" % job, ci, re.M) is None or words in pr_template)
 
 hook = os.path.join(PLUGIN, "scripts", "session_start.py")
 
