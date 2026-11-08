@@ -21,7 +21,7 @@ How to commit, open a PR and release. Humans and agents follow the same rules. T
 - CI labels the PR with its title type.
 - Small and focused: one concern per PR.
 - Fill in the PR template. Squash merge only.
-- Agents open PRs with `r5-bootstrap:r5-pr`, as drafts.
+- Agents open PRs with `r5-util:pr`, as drafts.
 - PRs with no activity for 45 days are closed after a warning. Add the `keep-open` label to stop that.
 - Workflows on pull requests never get secrets. Do not add any.
 

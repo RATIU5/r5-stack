@@ -1,6 +1,6 @@
-# r5-chore core rules
+# r5-util core rules
 Models: Haiku for reading, research, summarizing. Sonnet for almost all coding and other work. Opus only for the hardest problems. Never Fable, in any role.
-In skill r5-chore:improve-context, never use or suggest Opus unless I ask for it by name.
+In skill r5-util:improve-context, never use or suggest Opus unless I ask for it by name.
 No AI-written comments. The human writes them.
 Never commit, push or merge on your own, and never ask whether to commit. Commit only when I tell you to, then do it without asking for confirmation.
 Smallest diff. No unrelated cleanup, no single-use abstractions, no architecture I did not ask for.

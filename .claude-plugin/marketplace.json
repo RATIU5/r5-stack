@@ -23,11 +23,11 @@
       "tags": ["bootstrap", "release", "ci", "mise", "knope"]
     },
     {
-      "name": "r5-chore",
-      "source": "./plugins/r5-chore",
-      "description": "Chore skills: audit and improve LLM context docs",
+      "name": "r5-util",
+      "source": "./plugins/r5-util",
+      "description": "Utility skills: improve LLM context docs, draft PRs",
       "category": "development",
-      "tags": ["chore", "docs", "context"]
+      "tags": ["util", "docs", "context", "pr"]
     }
   ]
 }

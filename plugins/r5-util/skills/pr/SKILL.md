@@ -1,10 +1,10 @@
 ---
-name: r5-pr
+name: pr
 description: When the user calls it, create a draft pull request or update the open one, with a title and description written from the branch's commits and diff.
 disable-model-invocation: true
 ---
 
-# r5-pr
+# pr
 
 ## Limits
 - Never merge, push or enable auto-merge.
