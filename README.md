@@ -40,6 +40,7 @@ claude plugin install r5-chore@r5-stack
 .claude-plugin/marketplace.json
 plugins/r5-odin/           Odin plugin
 plugins/r5-bootstrap/      repo bootstrap plugin
+plugins/r5-chore/          chore skills plugin
 tests/r5-odin/             hook tests and the allocator test suite
 tests/r5-bootstrap/        skill checks and an end-to-end tool test
 ```

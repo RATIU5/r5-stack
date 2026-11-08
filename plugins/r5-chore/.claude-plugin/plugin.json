@@ -1,7 +1,7 @@
 {
   "name": "r5-chore",
   "version": "0.1.0",
-  "description": "Chore skills for Claude Code: audit and improve context docs, and more to come",
+  "description": "Chore skills for Claude Code: audit and improve LLM context docs",
   "author": {
     "name": "John Memmott",
     "url": "https://github.com/RATIU5"
