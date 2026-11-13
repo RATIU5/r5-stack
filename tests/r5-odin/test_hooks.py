@@ -38,8 +38,13 @@ def expect(name, got, want):
     print("%s %s -> %s" % (status, name, got))
 
 
-def bash(command):
-    return {"tool_name": "Bash", "tool_input": {"command": command}}
+ODIN_DIR = tempfile.mkdtemp()
+with open(os.path.join(ODIN_DIR, "m.odin"), "w") as f:
+    f.write("package m\n")
+
+
+def bash(command, cwd=ODIN_DIR):
+    return {"tool_name": "Bash", "cwd": cwd, "tool_input": {"command": command}}
 
 
 def edit(path, old, new):
@@ -172,6 +177,11 @@ with tempfile.TemporaryDirectory() as odin_dir,tempfile.TemporaryDirectory() as 
     expect("start: odin project injects rules", code == 0 and "r5-odin core rules" in ctx, True)
     code, out = run(START, {"cwd": empty_dir})
     expect("start: non-odin dir is silent", (code, out.strip()), (0, ""))
+
+with tempfile.TemporaryDirectory() as plain:
+    expect("scope: git commit allowed outside odin projects", decision(bash("git commit -m x", plain)), "allow")
+    expect("scope: git push allowed outside odin projects", decision(bash("git push origin main", plain)), "allow")
+    expect("scope: git commit denied in odin projects", decision(bash("git commit -m x")), "deny")
 
 for name, raw in [
     ("empty stdin", ""),

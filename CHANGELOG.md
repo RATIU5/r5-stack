@@ -4,6 +4,11 @@ All notable changes to the plugins in this repository are recorded here, newest 
 
 ## [Unreleased]
 
+## [r5-odin 0.1.7] - 2026-11-13
+
+### Fixed
+- r5-odin: the guard blocks `git commit`, `push` and the other protected git commands only in Odin projects. Elsewhere they run normally. Odin detection is shared with the session start hook.
+
 ## [r5-util 0.2.1] - 2026-11-08
 
 ### Changed

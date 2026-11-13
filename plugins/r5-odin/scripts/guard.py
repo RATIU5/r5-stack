@@ -4,6 +4,9 @@ import re
 import shlex
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from odin_project import is_odin_project
+
 BLOCKED_SUBCOMMANDS = ("commit", "push", "merge", "pull", "cherry-pick", "revert", "am", "rebase")
 GH_BLOCKED = (("pr", "merge"),)
 HEREDOC = re.compile(r"<<(-?)\s*(?:'([^']*)'|\"([^\"]*)\"|\\?\w+)")
@@ -300,7 +303,8 @@ def main():
     if not isinstance(tool_input, dict):
         return
     if tool_name == "Bash":
-        check_bash(tool_input)
+        if is_odin_project(event):
+            check_bash(tool_input)
     elif tool_name in ("Agent", "Task"):
         check_agent(tool_input)
     elif tool_name in ("Edit", "Write", "MultiEdit"):
